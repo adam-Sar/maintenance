@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($user['role'] === 'landlord') {
                 header('Location: admin_dashboard.php');
             } else {
-                header('Location: user_dashboard.php');
+                header('Location: tenant_main.php');
             }
             exit;
         } else {

@@ -1,0 +1,56 @@
+[
+    {
+        "id": 1,
+        "organization_id": 1,
+        "name": "Maintenance & Repairs",
+        "description": "General maintenance, repairs, and emergency services",
+        "icon": "🔧",
+        "color": "#3b82f6",
+        "manager": "John Maintenance"
+    },
+    {
+        "id": 2,
+        "organization_id": 1,
+        "name": "Plumbing Services",
+        "description": "All plumbing-related issues and installations",
+        "icon": "🚰",
+        "color": "#06b6d4",
+        "manager": "Sarah Plumber"
+    },
+    {
+        "id": 3,
+        "organization_id": 1,
+        "name": "Electrical Services",
+        "description": "Electrical repairs and installations",
+        "icon": "⚡",
+        "color": "#f59e0b",
+        "manager": "Mike Electrician"
+    },
+    {
+        "id": 4,
+        "organization_id": 1,
+        "name": "HVAC & Climate",
+        "description": "Heating, cooling, and ventilation systems",
+        "icon": "🌡️",
+        "color": "#8b5cf6",
+        "manager": "Tom HVAC"
+    },
+    {
+        "id": 5,
+        "organization_id": 2,
+        "name": "General Maintenance",
+        "description": "General repairs and maintenance services",
+        "icon": "🏗️",
+        "color": "#10b981",
+        "manager": "Emily Manager"
+    },
+    {
+        "id": 6,
+        "organization_id": 2,
+        "name": "Appliance Repair",
+        "description": "Kitchen and home appliance repairs",
+        "icon": "🔌",
+        "color": "#ec4899",
+        "manager": "Robert Tech"
+    }
+]

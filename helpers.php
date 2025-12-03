@@ -91,3 +91,62 @@ function getNextId($filename) {
     $maxId = max(array_column($data, 'id'));
     return $maxId + 1;
 }
+
+function getDepartmentsByOrganization($organizationId) {
+    $departments = getJsonData('departments.json');
+    return array_filter($departments, function($dept) use ($organizationId) {
+        return $dept['organization_id'] == $organizationId;
+    });
+}
+
+function getUserDepartments($userId, $organizationId = null) {
+    $userDepts = getJsonData('user_departments.json');
+    $filtered = array_filter($userDepts, function($ud) use ($userId, $organizationId) {
+        if ($organizationId) {
+            return $ud['user_id'] == $userId && $ud['organization_id'] == $organizationId;
+        }
+        return $ud['user_id'] == $userId;
+    });
+    return array_values($filtered);
+}
+
+function getUserOrganizations($userId) {
+    $userDepts = getUserDepartments($userId);
+    $orgIds = array_unique(array_column($userDepts, 'organization_id'));
+    
+    $organizations = getJsonData('organizations.json');
+    return array_filter($organizations, function($org) use ($orgIds) {
+        return in_array($org['id'], $orgIds);
+    });
+}
+
+function getDepartmentById($departmentId) {
+    $departments = getJsonData('departments.json');
+    foreach ($departments as $dept) {
+        if ($dept['id'] == $departmentId) {
+            return $dept;
+        }
+    }
+    return null;
+}
+
+function getComplaintsByDepartment($departmentId, $userId = null) {
+    $complaints = getJsonData('complaints.json');
+    return array_filter($complaints, function($complaint) use ($departmentId, $userId) {
+        $deptMatch = isset($complaint['department_id']) && $complaint['department_id'] == $departmentId;
+        if ($userId) {
+            return $deptMatch && $complaint['user_id'] == $userId;
+        }
+        return $deptMatch;
+    });
+}
+
+function isUserInDepartment($userId, $departmentId) {
+    $userDepts = getJsonData('user_departments.json');
+    foreach ($userDepts as $ud) {
+        if ($ud['user_id'] == $userId && $ud['department_id'] == $departmentId) {
+            return true;
+        }
+    }
+    return false;
+}
