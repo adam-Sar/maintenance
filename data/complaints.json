@@ -1,0 +1,67 @@
+[
+    {
+        "id": 1,
+        "organization_id": 1,
+        "user_id": 2,
+        "unit_number": "A-201",
+        "category": "Plumbing",
+        "title": "Leaking Kitchen Faucet",
+        "description": "The kitchen faucet has been leaking for the past 3 days. Water drips continuously even when fully closed.",
+        "status": "pending",
+        "priority": "medium",
+        "submitted_at": "2025-12-01T09:30:00",
+        "updated_at": "2025-12-03T08:49:23"
+    },
+    {
+        "id": 2,
+        "organization_id": 1,
+        "user_id": 3,
+        "unit_number": "B-105",
+        "category": "Electrical",
+        "title": "Light Fixture Not Working",
+        "description": "The light fixture in the living room stopped working. Tried replacing the bulb but still no light.",
+        "status": "in_progress",
+        "priority": "low",
+        "submitted_at": "2025-11-28T14:20:00",
+        "updated_at": "2025-12-02T10:15:00"
+    },
+    {
+        "id": 3,
+        "organization_id": 1,
+        "user_id": 2,
+        "unit_number": "A-201",
+        "category": "HVAC",
+        "title": "Heating Not Working",
+        "description": "The heating system is not working. Temperature is dropping and it's getting very cold inside the apartment.",
+        "status": "pending",
+        "priority": "high",
+        "submitted_at": "2025-12-02T18:45:00",
+        "updated_at": "2025-12-02T18:45:00"
+    },
+    {
+        "id": 4,
+        "organization_id": 2,
+        "user_id": 5,
+        "unit_number": "301",
+        "category": "Appliances",
+        "title": "Refrigerator Making Loud Noise",
+        "description": "The refrigerator has been making a very loud buzzing noise for the past week. It's especially loud at night.",
+        "status": "resolved",
+        "priority": "medium",
+        "submitted_at": "2025-11-26T11:00:00",
+        "updated_at": "2025-11-30T15:30:00"
+    },
+    {
+        "id": 5,
+        "organization_id": 1,
+        "user_id": 3,
+        "unit_number": "B-105",
+        "category": "General",
+        "title": "Damaged Window Screen",
+        "description": "The window screen in the bedroom has a large tear. Insects are getting inside the apartment.",
+        "status": "pending",
+        "priority": "low",
+        "submitted_at": "2025-12-03T08:10:00",
+        "updated_at": "2025-12-03T08:27:10"
+    }
+]

@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "name": "Sunset Apartments",
+        "address": "123 Main Street, Downtown",
+        "total_units": 24,
+        "admin_email": "admin@sunsetapts.com"
+    },
+    {
+        "id": 2,
+        "name": "Green Valley Residences",
+        "address": "456 Oak Avenue, Midtown",
+        "total_units": 18,
+        "admin_email": "manager@greenvalley.com"
+    },
+    {
+        "id": 3,
+        "name": "Riverside Towers",
+        "address": "789 River Road, Uptown",
+        "total_units": 36,
+        "admin_email": "admin@riversidetowers.com"
+    },
+    {
+        "id": 4,
+        "name": "Harbor View Complex",
+        "address": "321 Harbor Blvd, Waterfront",
+        "total_units": 42,
+        "admin_email": "landlord@harborview.com"
+    }
+]
