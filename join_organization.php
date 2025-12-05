@@ -18,7 +18,9 @@ $successMessage = '';
 $errorMessage = '';
 
 // Get all organizations
-$allOrganizations = getJsonData('organizations.json');
+global $conn;
+$result = mysqli_query($conn, "SELECT * FROM organizations ORDER BY name ASC");
+$allOrganizations = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
 // Get organizations user is already in
 $userOrgs = getUserOrganizations($user['id']);
@@ -33,51 +35,49 @@ $availableOrganizations = array_filter($allOrganizations, function($org) use ($u
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_organization'])) {
     $orgId = $_POST['organization_id'] ?? '';
     $unitNumber = $_POST['unit_number'] ?? '';
-    $departmentIds = $_POST['departments'] ?? [];
     
     if (empty($orgId)) {
         $errorMessage = 'Please select an organization';
     } elseif (empty($unitNumber)) {
         $errorMessage = 'Please provide your unit number';
-    } elseif (empty($departmentIds)) {
-        $errorMessage = 'Please select at least one department';
     } else {
         // Check if user already in this organization
         if (in_array($orgId, $userOrgIds)) {
             $errorMessage = 'You are already a member of this organization';
         } else {
-            $userDepartments = getJsonData('user_departments.json');
+            // Database operations
+            global $conn;
             
-            // Add user to selected departments
-            foreach ($departmentIds as $deptId) {
-                $newRelation = [
-                    'id' => getNextId('user_departments.json'),
-                    'user_id' => $user['id'],
-                    'organization_id' => (int)$orgId,
-                    'department_id' => (int)$deptId,
-                    'unit_number' => $unitNumber,
-                    'joined_at' => date('Y-m-d\TH:i:s')
-                ];
-                
-                $userDepartments[] = $newRelation;
+            $orgId = (int)$orgId;
+            $unitNumber = mysqli_real_escape_string($conn, $unitNumber);
+            
+            // Check if unit exists
+            $query = "SELECT id FROM units WHERE organization_id = $orgId AND name = '$unitNumber'";
+            $result = mysqli_query($conn, $query);
+            
+            if (mysqli_num_rows($result) > 0) {
+                $unit = mysqli_fetch_assoc($result);
+                $unitId = $unit['id'];
+            } else {
+                // Create new unit
+                $query = "INSERT INTO units (organization_id, name) VALUES ($orgId, '$unitNumber')";
+                mysqli_query($conn, $query);
+                $unitId = mysqli_insert_id($conn);
             }
             
-            saveJsonData('user_departments.json', $userDepartments);
+            // Link user to unit
+            $userId = (int)$user['id'];
+            $query = "INSERT INTO user_units (user_id, organization_id, unit_id, status) VALUES ($userId, $orgId, $unitId, 1)";
             
-            $_SESSION['selected_org_id'] = (int)$orgId;
-            header('Location: tenant_main.php?success=joined');
-            exit;
+            if (mysqli_query($conn, $query)) {
+                $_SESSION['selected_org_id'] = $orgId;
+                header('Location: tenant_main.php?success=joined');
+                exit;
+            } else {
+                $errorMessage = "Error joining organization: " . mysqli_error($conn);
+            }
         }
     }
-}
-
-// Get departments for selected organization (for AJAX)
-if (isset($_GET['get_departments']) && isset($_GET['org_id'])) {
-    $orgId = (int)$_GET['org_id'];
-    $departments = getDepartmentsByOrganization($orgId);
-    header('Content-Type: application/json');
-    echo json_encode(array_values($departments));
-    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -95,7 +95,7 @@ if (isset($_GET['get_departments']) && isset($_GET['org_id'])) {
                 <span>←</span> Back
             </a>
             <h1>Join New Organization</h1>
-            <p>Select an organization and departments to get started</p>
+            <p>Select an organization and enter your unit number</p>
         </div>
 
         <div class="form-container">
@@ -110,18 +110,17 @@ if (isset($_GET['get_departments']) && isset($_GET['org_id'])) {
                     <div class="empty-icon">🎉</div>
                     <h2>All Set!</h2>
                     <p>You're already a member of all available organizations.</p>
-                    <a href="tenant_main.php" class="btn-primary">Back to Departments</a>
+                    <a href="tenant_main.php" class="btn-primary">Back to My Apartments</a>
                 </div>
             <?php else: ?>
                 <form method="POST" id="joinForm">
                     <div class="form-group">
                         <label for="organization_id">Select Organization *</label>
-                        <select name="organization_id" id="organization_id" required onchange="loadDepartments()">
+                        <select name="organization_id" id="organization_id" required onchange="showOrgInfo()">
                             <option value="">Choose an organization...</option>
                             <?php foreach ($availableOrganizations as $org): ?>
                                 <option value="<?php echo $org['id']; ?>" 
-                                        data-address="<?php echo htmlspecialchars($org['address']); ?>"
-                                        data-units="<?php echo $org['total_units']; ?>">
+                                        data-address="<?php echo htmlspecialchars($org['address'] ?? ''); ?>">
                                     <?php echo htmlspecialchars($org['name']); ?>
                                 </option>
                             <?php endforeach; ?>
@@ -139,14 +138,6 @@ if (isset($_GET['get_departments']) && isset($_GET['org_id'])) {
                         <small>Enter your apartment/unit number in this building</small>
                     </div>
 
-                    <div class="form-group">
-                        <label>Select Departments to Join *</label>
-                        <small>Choose the departments you need for maintenance requests</small>
-                        <div class="departments-list" id="departmentsList">
-                            <p class="select-org-first">Please select an organization first</p>
-                        </div>
-                    </div>
-
                     <div class="form-actions">
                         <button type="submit" name="join_organization" class="btn-submit">
                             Join Organization
@@ -159,70 +150,27 @@ if (isset($_GET['get_departments']) && isset($_GET['org_id'])) {
     </div>
 
     <script>
-        function loadDepartments() {
+        function showOrgInfo() {
             const select = document.getElementById('organization_id');
-            const orgId = select.value;
             const orgInfo = document.getElementById('orgInfo');
-            const deptList = document.getElementById('departmentsList');
             
-            if (!orgId) {
+            if (!select.value) {
                 orgInfo.innerHTML = '';
-                deptList.innerHTML = '<p class="select-org-first">Please select an organization first</p>';
                 return;
             }
             
-            // Show organization info
             const selectedOption = select.options[select.selectedIndex];
             const address = selectedOption.getAttribute('data-address');
-            const units = selectedOption.getAttribute('data-units');
             
-            orgInfo.innerHTML = `
-                <div class="info-card">
-                    <span>📍 ${address}</span>
-                    <span>🏠 ${units} units</span>
-                </div>
-            `;
-            
-            // Load departments
-            deptList.innerHTML = '<p class="loading">Loading departments...</p>';
-            
-            fetch(`join_organization.php?get_departments=1&org_id=${orgId}`)
-                .then(response => response.json())
-                .then(departments => {
-                    if (departments.length === 0) {
-                        deptList.innerHTML = '<p class="no-depts">No departments available</p>';
-                        return;
-                    }
-                    
-                    let html = '';
-                    departments.forEach(dept => {
-                        html += `
-                            <label class="dept-checkbox">
-                                <input type="checkbox" 
-                                       name="departments[]" 
-                                       value="${dept.id}"
-                                       id="dept_${dept.id}">
-                                <div class="dept-card">
-                                    <div class="dept-icon" style="background: ${dept.color}20; color: ${dept.color}">
-                                        ${dept.icon}
-                                    </div>
-                                    <div class="dept-info">
-                                        <h4>${dept.name}</h4>
-                                        <p>${dept.description}</p>
-                                        <span class="dept-manager">👤 ${dept.manager}</span>
-                                    </div>
-                                    <div class="check-indicator">✓</div>
-                                </div>
-                            </label>
-                        `;
-                    });
-                    
-                    deptList.innerHTML = html;
-                })
-                .catch(error => {
-                    deptList.innerHTML = '<p class="error">Error loading departments</p>';
-                    console.error('Error:', error);
-                });
+            if (address) {
+                orgInfo.innerHTML = `
+                    <div class="info-card">
+                        <span>📍 ${address}</span>
+                    </div>
+                `;
+            } else {
+                orgInfo.innerHTML = '';
+            }
         }
     </script>
 </body>

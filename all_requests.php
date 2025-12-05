@@ -14,30 +14,17 @@ if (!$user || $user['role'] !== 'tenant') {
     exit;
 }
 
-// Get all user's departments
-$allUserDepartments = getUserDepartments($user['id']);
-$userDeptIds = array_column($allUserDepartments, 'department_id');
-
 // Get all complaints by this user
 $allComplaints = getComplaintsByUser($user['id']);
 
-// Sort by submitted date (newest first)
-usort($allComplaints, function($a, $b) {
-    return strtotime($b['submitted_at']) - strtotime($a['submitted_at']);
-});
-
-// Group by department
-$complaintsByDepartment = [];
-$departments = getJsonData('departments.json');
-$organizations = getJsonData('organizations.json');
-
-foreach ($allComplaints as $complaint) {
-    $deptId = $complaint['department_id'] ?? null;
-    if (!isset($complaintsByDepartment[$deptId])) {
-        $complaintsByDepartment[$deptId] = [];
+// Get unique categories for filter
+$categories = [];
+foreach ($allComplaints as $c) {
+    if (!empty($c['category']) && !in_array($c['category'], $categories)) {
+        $categories[] = $c['category'];
     }
-    $complaintsByDepartment[$deptId][] = $complaint;
 }
+sort($categories);
 
 // Get statistics
 $totalRequests = count($allComplaints);
@@ -47,7 +34,7 @@ $resolvedCount = count(array_filter($allComplaints, fn($c) => $c['status'] === '
 
 // Filter
 $filterStatus = $_GET['status'] ?? 'all';
-$filterDept = $_GET['dept'] ?? 'all';
+$filterCategory = $_GET['category'] ?? 'all';
 
 $filteredComplaints = $allComplaints;
 
@@ -55,8 +42,8 @@ if ($filterStatus !== 'all') {
     $filteredComplaints = array_filter($filteredComplaints, fn($c) => $c['status'] === $filterStatus);
 }
 
-if ($filterDept !== 'all') {
-    $filteredComplaints = array_filter($filteredComplaints, fn($c) => ($c['department_id'] ?? 0) == $filterDept);
+if ($filterCategory !== 'all') {
+    $filteredComplaints = array_filter($filteredComplaints, fn($c) => $c['category'] === $filterCategory);
 }
 
 // Logout handling
@@ -96,7 +83,7 @@ if (isset($_GET['logout'])) {
         <nav class="sidebar-nav">
             <a href="tenant_main.php" class="nav-item">
                 <span class="nav-icon">🏠</span>
-                <span>My Departments</span>
+                <span>My Apartments</span>
             </a>
             <a href="all_requests.php" class="nav-item active">
                 <span class="nav-icon">📋</span>
@@ -122,7 +109,7 @@ if (isset($_GET['logout'])) {
                     <h1>📋 All Maintenance Requests</h1>
                     <p>View and track all your submitted maintenance requests</p>
                 </div>
-                <a href="tenant_main.php" class="btn-back">Back to Departments</a>
+                <a href="tenant_main.php" class="btn-back">Back to Apartments</a>
             </div>
         </div>
 
@@ -171,15 +158,13 @@ if (isset($_GET['logout'])) {
             </div>
             
             <div class="filter-group">
-                <label>Department:</label>
-                <select onchange="applyFilter()" id="deptFilter">
-                    <option value="all" <?php echo $filterDept === 'all' ? 'selected' : ''; ?>>All Departments</option>
-                    <?php foreach ($departments as $dept): ?>
-                        <?php if (in_array($dept['id'], $userDeptIds)): ?>
-                            <option value="<?php echo $dept['id']; ?>" <?php echo $filterDept == $dept['id'] ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($dept['name']); ?>
-                            </option>
-                        <?php endif; ?>
+                <label>Category:</label>
+                <select onchange="applyFilter()" id="categoryFilter">
+                    <option value="all" <?php echo $filterCategory === 'all' ? 'selected' : ''; ?>>All Categories</option>
+                    <?php foreach ($categories as $cat): ?>
+                        <option value="<?php echo htmlspecialchars($cat); ?>" <?php echo $filterCategory === $cat ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($cat); ?>
+                        </option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -202,19 +187,25 @@ if (isset($_GET['logout'])) {
                 <div class="requests-list">
                     <?php foreach ($filteredComplaints as $complaint): ?>
                         <?php 
-                        $dept = getDepartmentById($complaint['department_id'] ?? 0);
                         $org = getOrganizationById($complaint['organization_id'] ?? 0);
+                        // Get unit name if possible
+                        $unitName = 'Unknown';
+                        if (isset($complaint['unit_id'])) {
+                            global $conn;
+                            $unitId = (int)$complaint['unit_id'];
+                            $query = "SELECT name FROM units WHERE id = $unitId";
+                            $result = mysqli_query($conn, $query);
+                            if ($u = mysqli_fetch_assoc($result)) {
+                                $unitName = $u['name'];
+                            }
+                        }
                         ?>
                         <div class="request-card">
                             <div class="request-header">
-                                <div class="dept-badge" style="background: <?php echo $dept ? $dept['color'] : '#6b7280'; ?>20; color: <?php echo $dept ? $dept['color'] : '#6b7280'; ?>">
-                                    <?php echo $dept ? $dept['icon'] : '🏢'; ?>
-                                    <?php echo $dept ? htmlspecialchars($dept['name']) : 'Unknown'; ?>
+                                <div class="dept-badge">
+                                    📁 <?php echo htmlspecialchars($complaint['category']); ?>
                                 </div>
                                 <div class="badges">
-                                    <span class="badge <?php echo getPriorityBadgeClass($complaint['priority']); ?>">
-                                        <?php echo ucfirst($complaint['priority']); ?>
-                                    </span>
                                     <span class="badge <?php echo getStatusBadgeClass($complaint['status']); ?>">
                                         <?php echo ucfirst(str_replace('_', ' ', $complaint['status'])); ?>
                                     </span>
@@ -227,16 +218,9 @@ if (isset($_GET['logout'])) {
                             
                             <div class="request-meta">
                                 <span>🏢 <?php echo $org ? htmlspecialchars($org['name']) : 'Unknown'; ?></span>
-                                <span>🏠 Unit <?php echo htmlspecialchars($complaint['unit_number']); ?></span>
-                                <span>📁 <?php echo htmlspecialchars($complaint['category']); ?></span>
+                                <span>🏠 Unit <?php echo htmlspecialchars($unitName); ?></span>
                                 <span>🕒 <?php echo formatDateTime($complaint['submitted_at']); ?></span>
                             </div>
-                            
-                            <?php if ($complaint['updated_at'] !== $complaint['submitted_at']): ?>
-                                <div class="request-footer">
-                                    Last updated: <?php echo formatDateTime($complaint['updated_at']); ?>
-                                </div>
-                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -252,11 +236,11 @@ if (isset($_GET['logout'])) {
 
         function applyFilter() {
             const status = document.getElementById('statusFilter').value;
-            const dept = document.getElementById('deptFilter').value;
+            const category = document.getElementById('categoryFilter').value;
             
             let url = 'all_requests.php?';
             if (status !== 'all') url += 'status=' + status + '&';
-            if (dept !== 'all') url += 'dept=' + dept;
+            if (category !== 'all') url += 'category=' + category;
             
             window.location.href = url;
         }

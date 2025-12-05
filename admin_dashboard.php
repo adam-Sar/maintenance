@@ -10,22 +10,30 @@ if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true)
 
 $user = getUserByEmail($_SESSION['user_email']);
 if (!$user || $user['role'] !== 'landlord') {
-    header('Location: user_dashboard.php');
+    header('Location: tenant_main.php');
     exit;
 }
 
-// Get organization details
-$organization = getOrganizationById($user['organization_id']);
+// Check if landlord manages an organization
+// In SQL schema, organizations table has admin_id.
+// We need to find the organization where admin_id = user_id
+global $conn;
+$userId = (int)$user['id'];
+$query = "SELECT * FROM organizations WHERE admin_id = $userId";
+$result = mysqli_query($conn, $query);
+$organization = mysqli_fetch_assoc($result);
+
+if (!$organization) {
+    // Handle case where landlord has no organization
+}
 
 // Get all complaints for this organization
-$complaints = getComplaintsByOrganization($user['organization_id']);
+$complaints = [];
+if ($organization) {
+    $complaints = getComplaintsByOrganization($organization['id']);
+}
 
-// Sort by submitted date (newest first)
-usort($complaints, function($a, $b) {
-    return strtotime($b['submitted_at']) - strtotime($a['submitted_at']);
-});
-
-// Get statistics
+// Statistics
 $totalComplaints = count($complaints);
 $pendingCount = count(array_filter($complaints, fn($c) => $c['status'] === 'pending'));
 $inProgressCount = count(array_filter($complaints, fn($c) => $c['status'] === 'in_progress'));
@@ -34,20 +42,15 @@ $resolvedCount = count(array_filter($complaints, fn($c) => $c['status'] === 'res
 // Handle status update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $complaintId = (int)$_POST['complaint_id'];
-    $newStatus = $_POST['status'];
+    $newStatus = mysqli_real_escape_string($conn, $_POST['status']);
     
-    $allComplaints = getJsonData('complaints.json');
-    foreach ($allComplaints as &$complaint) {
-        if ($complaint['id'] == $complaintId) {
-            $complaint['status'] = $newStatus;
-            $complaint['updated_at'] = date('Y-m-d\TH:i:s');
-            break;
-        }
+    global $conn;
+    $query = "UPDATE complaints SET status = '$newStatus' WHERE id = $complaintId";
+    
+    if (mysqli_query($conn, $query)) {
+        header('Location: admin_dashboard.php?success=1');
+        exit;
     }
-    saveJsonData('complaints.json', $allComplaints);
-    
-    header('Location: admin_dashboard.php?success=1');
-    exit;
 }
 
 // Logout handling
@@ -62,7 +65,7 @@ if (isset($_GET['logout'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - <?php echo htmlspecialchars($organization['name']); ?></title>
+    <title>Admin Dashboard - <?php echo $organization ? htmlspecialchars($organization['name']) : 'Maintenance'; ?></title>
     <meta name="description" content="Manage maintenance requests for your properties">
     <link rel="stylesheet" href="admin_styles.css">
 </head>
@@ -70,8 +73,8 @@ if (isset($_GET['logout'])) {
     <div class="dashboard-header">
         <div class="header-content">
             <div>
-                <h1>🏢 <?php echo htmlspecialchars($organization['name']); ?></h1>
-                <p class="org-address"><?php echo htmlspecialchars($organization['address']); ?></p>
+                <h1>🏢 <?php echo $organization ? htmlspecialchars($organization['name']) : 'No Organization'; ?></h1>
+                <p class="org-address"><?php echo $organization ? htmlspecialchars($organization['address']) : ''; ?></p>
             </div>
             <div class="header-actions">
                 <span class="user-info">👤 <?php echo htmlspecialchars($user['name']); ?></span>
@@ -141,9 +144,6 @@ if (isset($_GET['logout'])) {
                                     </div>
                                 </div>
                                 <div class="badges">
-                                    <span class="badge <?php echo getPriorityBadgeClass($complaint['priority']); ?>">
-                                        <?php echo ucfirst($complaint['priority']); ?> Priority
-                                    </span>
                                     <span class="badge <?php echo getStatusBadgeClass($complaint['status']); ?>">
                                         <?php echo ucfirst(str_replace('_', ' ', $complaint['status'])); ?>
                                     </span>

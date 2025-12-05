@@ -33,12 +33,19 @@ foreach ($userApartments as $apt) {
     $unitNumber = '';
     foreach ($userDeptRelations as $relation) {
         if ($relation['organization_id'] == $apt['id']) {
-            $unitNumber = $relation['unit_number'];
+            $unitNumber = $relation['unit_name'] ?? ''; // Use unit_name from JOIN
             break;
         }
     }
     
     $apt['my_unit'] = $unitNumber;
+    // Initialize missing fields for display
+    $apt['images'] = []; // No images in SQL
+    $apt['amenities'] = []; // No amenities in SQL
+    $apt['property_type'] = 'Apartment Complex';
+    $apt['year_built'] = 'N/A';
+    $apt['total_units'] = 'N/A';
+    
     $apartments[] = $apt;
 }
 

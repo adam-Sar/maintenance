@@ -1,56 +1,50 @@
 <?php
-// Helper functions for data management
+require_once __DIR__ . '/db_connect.php';
 
-function getJsonData($filename) {
-    $filepath = __DIR__ . '/data/' . $filename;
-    if (!file_exists($filepath)) {
-        return [];
-    }
-    $data = file_get_contents($filepath);
-    return json_decode($data, true) ?? [];
-}
-
-function saveJsonData($filename, $data) {
-    $filepath = __DIR__ . '/data/' . $filename;
-    $dir = dirname($filepath);
-    if (!is_dir($dir)) {
-        mkdir($dir, 0777, true);
-    }
-    return file_put_contents($filepath, json_encode($data, JSON_PRETTY_PRINT));
-}
+// Helper functions for data management using MySQL (Procedural Style)
 
 function getUserByEmail($email) {
-    $users = getJsonData('users.json');
-    foreach ($users as $user) {
-        if ($user['email'] === $email) {
-            return $user;
-        }
-    }
-    return null;
+    global $conn;
+    $email = mysqli_real_escape_string($conn, $email);
+    $query = "SELECT * FROM users WHERE email = '$email'";
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_assoc($result);
 }
 
 function getOrganizationById($id) {
-    $organizations = getJsonData('organizations.json');
-    foreach ($organizations as $org) {
-        if ($org['id'] == $id) {
-            return $org;
-        }
-    }
-    return null;
+    global $conn;
+    $id = (int)$id;
+    $query = "SELECT * FROM organizations WHERE id = $id";
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_assoc($result);
 }
 
 function getComplaintsByOrganization($organizationId) {
-    $complaints = getJsonData('complaints.json');
-    return array_filter($complaints, function($complaint) use ($organizationId) {
-        return $complaint['organization_id'] == $organizationId;
-    });
+    global $conn;
+    $organizationId = (int)$organizationId;
+    $query = "
+        SELECT c.*, u.name as unit_number 
+        FROM complaints c
+        JOIN units u ON c.unit_id = u.id
+        WHERE c.organization_id = $organizationId 
+        ORDER BY c.submitted_at DESC
+    ";
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
 function getComplaintsByUser($userId) {
-    $complaints = getJsonData('complaints.json');
-    return array_filter($complaints, function($complaint) use ($userId) {
-        return $complaint['user_id'] == $userId;
-    });
+    global $conn;
+    $userId = (int)$userId;
+    $query = "
+        SELECT c.*, u.name as unit_number 
+        FROM complaints c
+        JOIN units u ON c.unit_id = u.id
+        WHERE c.user_id = $userId 
+        ORDER BY c.submitted_at DESC
+    ";
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
 function getPriorityBadgeClass($priority) {
@@ -83,70 +77,82 @@ function formatDateTime($datetime) {
     return date('M d, Y g:i A', strtotime($datetime));
 }
 
-function getNextId($filename) {
-    $data = getJsonData($filename);
-    if (empty($data)) {
-        return 1;
-    }
-    $maxId = max(array_column($data, 'id'));
-    return $maxId + 1;
-}
-
 function getDepartmentsByOrganization($organizationId) {
-    $departments = getJsonData('departments.json');
-    return array_filter($departments, function($dept) use ($organizationId) {
-        return $dept['organization_id'] == $organizationId;
-    });
+    global $conn;
+    $organizationId = (int)$organizationId;
+    // Mapping 'departments' to 'units' table
+    $query = "SELECT * FROM units WHERE organization_id = $organizationId";
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
 function getUserDepartments($userId, $organizationId = null) {
-    $userDepts = getJsonData('user_departments.json');
-    $filtered = array_filter($userDepts, function($ud) use ($userId, $organizationId) {
-        if ($organizationId) {
-            return $ud['user_id'] == $userId && $ud['organization_id'] == $organizationId;
-        }
-        return $ud['user_id'] == $userId;
-    });
-    return array_values($filtered);
+    global $conn;
+    $userId = (int)$userId;
+    
+    if ($organizationId) {
+        $organizationId = (int)$organizationId;
+        $query = "
+            SELECT uu.*, u.name as unit_name, u.description as unit_description 
+            FROM user_units uu
+            JOIN units u ON uu.unit_id = u.id
+            WHERE uu.user_id = $userId AND uu.organization_id = $organizationId
+        ";
+    } else {
+        $query = "
+            SELECT uu.*, u.name as unit_name, u.description as unit_description 
+            FROM user_units uu
+            JOIN units u ON uu.unit_id = u.id
+            WHERE uu.user_id = $userId
+        ";
+    }
+    
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
 function getUserOrganizations($userId) {
-    $userDepts = getUserDepartments($userId);
-    $orgIds = array_unique(array_column($userDepts, 'organization_id'));
-    
-    $organizations = getJsonData('organizations.json');
-    return array_filter($organizations, function($org) use ($orgIds) {
-        return in_array($org['id'], $orgIds);
-    });
+    global $conn;
+    $userId = (int)$userId;
+    $query = "
+        SELECT DISTINCT o.* 
+        FROM organizations o
+        JOIN user_units uu ON o.id = uu.organization_id
+        WHERE uu.user_id = $userId
+    ";
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
 function getDepartmentById($departmentId) {
-    $departments = getJsonData('departments.json');
-    foreach ($departments as $dept) {
-        if ($dept['id'] == $departmentId) {
-            return $dept;
-        }
-    }
-    return null;
+    global $conn;
+    $departmentId = (int)$departmentId;
+    $query = "SELECT * FROM units WHERE id = $departmentId";
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_assoc($result);
 }
 
 function getComplaintsByDepartment($departmentId, $userId = null) {
-    $complaints = getJsonData('complaints.json');
-    return array_filter($complaints, function($complaint) use ($departmentId, $userId) {
-        $deptMatch = isset($complaint['department_id']) && $complaint['department_id'] == $departmentId;
-        if ($userId) {
-            return $deptMatch && $complaint['user_id'] == $userId;
-        }
-        return $deptMatch;
-    });
+    global $conn;
+    $departmentId = (int)$departmentId;
+    
+    if ($userId) {
+        $userId = (int)$userId;
+        $query = "SELECT * FROM complaints WHERE unit_id = $departmentId AND user_id = $userId ORDER BY submitted_at DESC";
+    } else {
+        $query = "SELECT * FROM complaints WHERE unit_id = $departmentId ORDER BY submitted_at DESC";
+    }
+    
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
 function isUserInDepartment($userId, $departmentId) {
-    $userDepts = getJsonData('user_departments.json');
-    foreach ($userDepts as $ud) {
-        if ($ud['user_id'] == $userId && $ud['department_id'] == $departmentId) {
-            return true;
-        }
-    }
-    return false;
+    global $conn;
+    $userId = (int)$userId;
+    $departmentId = (int)$departmentId;
+    
+    $query = "SELECT id FROM user_units WHERE user_id = $userId AND unit_id = $departmentId";
+    $result = mysqli_query($conn, $query);
+    return mysqli_num_rows($result) > 0;
 }

@@ -28,24 +28,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($password !== $confirm_password) {
         $error = 'Passwords do not match';
     } else {
-        $users = getJsonData('users.json');
+        // Database connection is available via helpers.php -> db_connect.php
+        global $conn;
         
-        $newUser = [
-            'id' => getNextId('users.json'),
-            'name' => $name,
-            'email' => $email,
-            'password' => password_hash($password, PASSWORD_DEFAULT),
-            'role' => $role,
-            'organization_id' => (int)$organization_id,
-            'unit_number' => $role === 'tenant' ? $unit_number : null,
-            'created_at' => date('Y-m-d\TH:i:s')
-        ];
+        // Start transaction
+        mysqli_begin_transaction($conn);
         
-        $users[] = $newUser;
-        saveJsonData('users.json', $users);
-        
-        $success = 'Account created successfully! You can now <a href="login.php" style="color: #059669; font-weight: 600;">login</a>.';
+        try {
+            // Insert User
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $name = mysqli_real_escape_string($conn, $name);
+            $email = mysqli_real_escape_string($conn, $email);
+            $role = mysqli_real_escape_string($conn, $role);
+            
+            $query = "INSERT INTO users (name, email, password, role) VALUES ('$name', '$email', '$hashed_password', '$role')";
+            
+            if (!mysqli_query($conn, $query)) {
+                throw new Exception("Error creating user account: " . mysqli_error($conn));
+            }
+            
+            $user_id = mysqli_insert_id($conn);
+            
+            // Handle Tenant Unit Linking
+            if ($role === 'tenant' && !empty($unit_number)) {
+                $organization_id = (int)$organization_id;
+                $unit_number = mysqli_real_escape_string($conn, $unit_number);
+                
+                // Check if unit exists in the organization
+                $query = "SELECT id FROM units WHERE organization_id = $organization_id AND name = '$unit_number'";
+                $result = mysqli_query($conn, $query);
+                
+                if (mysqli_num_rows($result) > 0) {
+                    $unit = mysqli_fetch_assoc($result);
+                    $unit_id = $unit['id'];
+                } else {
+                    // Create new unit
+                    $query = "INSERT INTO units (organization_id, name) VALUES ($organization_id, '$unit_number')";
+                    mysqli_query($conn, $query);
+                    $unit_id = mysqli_insert_id($conn);
+                }
+                
+                // Link user to unit
+                $query = "INSERT INTO user_units (user_id, organization_id, unit_id, status) VALUES ($user_id, $organization_id, $unit_id, 1)";
+                mysqli_query($conn, $query);
+            }
+            
+            // Commit transaction
+            mysqli_commit($conn);
+            
+            $success = 'Account created successfully! You can now <a href="login.php" style="color: #059669; font-weight: 600;">login</a>.';
+            
+        } catch (Exception $e) {
+            mysqli_rollback($conn);
+            $error = 'An error occurred: ' . $e->getMessage();
+        }
     }
+}
+
+// Fetch organizations for the dropdown
+$organizations = [];
+global $conn;
+$result = mysqli_query($conn, "SELECT * FROM organizations ORDER BY name ASC");
+if ($result) {
+    $organizations = mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 ?>
 <!DOCTYPE html>
@@ -83,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     id="role" 
                     name="role" 
                     required
-                    style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px; font-family: 'Inter', sans-serif; background: white; cursor: pointer;"
+                    style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; font-family: 'Inter', sans-serif; background: white; cursor: pointer;"
                     onchange="toggleUnitField()"
                 >
                     <option value="">Select your role...</option>
@@ -102,7 +147,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 >
                     <option value="">Select your organization...</option>
                     <?php
-                    $organizations = getJsonData('organizations.json');
                     foreach ($organizations as $org) {
                         $selected = (($_POST['organization_id'] ?? '') == $org['id']) ? 'selected' : '';
                         echo '<option value="' . $org['id'] . '" ' . $selected . '>🏢 ' . htmlspecialchars($org['name']) . '</option>';
