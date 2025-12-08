@@ -283,6 +283,35 @@ body {
     box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
 }
 
+.btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-submit:disabled:hover {
+    transform: none;
+    box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
+}
+
+.info-message {
+    background: #eff6ff;
+    color: #1e40af;
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    font-weight: 500;
+    border: 1px solid #dbeafe;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-message p {
+    margin: 0;
+    font-size: 14px;
+}
+
 .btn-cancel {
     padding: 16px 32px;
     background: white;

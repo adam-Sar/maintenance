@@ -83,7 +83,7 @@ if (isset($_GET['logout'])) {
         <nav class="sidebar-nav">
             <a href="tenant_main.php" class="nav-item">
                 <span class="nav-icon">🏠</span>
-                <span>My Apartments</span>
+                <span>My Organizations</span>
             </a>
             <a href="all_requests.php" class="nav-item active">
                 <span class="nav-icon">📋</span>
@@ -109,7 +109,7 @@ if (isset($_GET['logout'])) {
                     <h1>📋 All Maintenance Requests</h1>
                     <p>View and track all your submitted maintenance requests</p>
                 </div>
-                <a href="tenant_main.php" class="btn-back">Back to Apartments</a>
+                <a href="tenant_main.php" class="btn-back">Back to Organizations</a>
             </div>
         </div>
 

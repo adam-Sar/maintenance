@@ -1,8 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
 
@@ -10,17 +8,17 @@ body {
     font-family: 'Outfit', sans-serif;
     min-height: 100vh;
     display: flex;
-    align-items: center;
-    justify-content: center;
     background: #f8fafc;
     position: relative;
-    overflow: hidden;
+    padding: 40px 20px;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 /* Abstract Background Shapes */
 body::before {
     content: '';
-    position: absolute;
+    position: fixed;
     width: 120%;
     height: 120%;
     background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.05) 50%, transparent 100%);
@@ -30,7 +28,7 @@ body::before {
 
 body::after {
     content: '';
-    position: absolute;
+    position: fixed;
     top: -10%;
     right: -10%;
     width: 600px;
@@ -44,7 +42,7 @@ body::after {
 }
 
 .bg-shape-2 {
-    position: absolute;
+    position: fixed;
     bottom: -10%;
     left: -10%;
     width: 500px;
@@ -96,6 +94,7 @@ body::after {
     position: relative;
     z-index: 1;
     animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    margin: auto;
 }
 
 @keyframes slideUp {

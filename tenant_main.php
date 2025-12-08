@@ -20,34 +20,8 @@ if ($user['role'] === 'landlord') {
     exit;
 }
 
-// Get user's apartments (organizations they're in)
-$userApartments = getUserOrganizations($user['id']);
-
-// Get user department relations to get unit numbers
-$userDeptRelations = getUserDepartments($user['id']);
-
-// Create apartment data with unit numbers
-$apartments = [];
-foreach ($userApartments as $apt) {
-    // Find unit number for this apartment
-    $unitNumber = '';
-    foreach ($userDeptRelations as $relation) {
-        if ($relation['organization_id'] == $apt['id']) {
-            $unitNumber = $relation['unit_name'] ?? ''; // Use unit_name from JOIN
-            break;
-        }
-    }
-    
-    $apt['my_unit'] = $unitNumber;
-    // Initialize missing fields for display
-    $apt['images'] = []; // No images in SQL
-    $apt['amenities'] = []; // No amenities in SQL
-    $apt['property_type'] = 'Apartment Complex';
-    $apt['year_built'] = 'N/A';
-    $apt['total_units'] = 'N/A';
-    
-    $apartments[] = $apt;
-}
+// Get user's organizations
+$userOrganizations = getUserOrganizations($user['id']);
 
 // Logout handling
 if (isset($_GET['logout'])) {
@@ -61,8 +35,8 @@ if (isset($_GET['logout'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Apartments - MaintenanceHub</title>
-    <link rel="stylesheet" href="apartments_main.css">
+    <title>My Organizations - MaintenanceHub</title>
+    <link rel="stylesheet" href="units_main.css">
 </head>
 <body>
     <!-- Hamburger Menu -->
@@ -85,8 +59,8 @@ if (isset($_GET['logout'])) {
         </div>
         <nav class="sidebar-nav">
             <a href="tenant_main.php" class="nav-item active">
-                <span class="nav-icon">🏠</span>
-                <span>My Apartments</span>
+                <span class="nav-icon">🏢</span>
+                <span>My Organizations</span>
             </a>
             <a href="all_requests.php" class="nav-item">
                 <span class="nav-icon">📋</span>
@@ -108,94 +82,64 @@ if (isset($_GET['logout'])) {
         <!-- Top Bar -->
         <div class="top-bar">
             <div class="page-title">
-                <h1>My Apartments</h1>
-                <p>View and manage your rental properties</p>
+                <h1>My Organizations</h1>
+                <p>View and manage your organizations</p>
             </div>
-            <a href="join_organization.php" class="btn-add">
-                <span>➕</span> Add New Apartment
-            </a>
         </div>
 
         <?php if (isset($_GET['success'])): ?>
             <div class="success-alert">
                 <?php if ($_GET['success'] === 'joined'): ?>
-                    ✓ Successfully joined apartment! You can now submit maintenance requests.
+                    ✓ Successfully joined organization! You can now submit maintenance requests.
                 <?php elseif ($_GET['success'] === 'joined_dept'): ?>
-                    ✓ Successfully joined apartment!
+                    ✓ Successfully joined organization!
                 <?php endif; ?>
             </div>
         <?php endif; ?>
 
-        <?php if (empty($apartments)): ?>
-            <!-- No Apartments State -->
+        <?php if (empty($userOrganizations)): ?>
+            <!-- No Organizations State -->
             <div class="empty-state">
                 <div class="empty-icon">🏢</div>
-                <h2>No Apartments Found</h2>
-                <p>You haven't joined any apartments yet. Add your first apartment to get started with maintenance requests.</p>
-                <a href="join_organization.php" class="btn-primary">Add My Apartment</a>
+                <h2>No Organizations Found</h2>
+                <p>You haven't joined any organizations yet. Add your first organization to get started with maintenance requests.</p>
+                <a href="join_organization.php" class="btn-primary">Join Organization</a>
             </div>
         <?php else: ?>
-            <!-- Apartments Grid -->
-            <div class="apartments-grid">
-                <?php foreach ($apartments as $apt): ?>
-                    <a href="apartment_detail.php?apt_id=<?php echo $apt['id']; ?>" class="apartment-card">
-                        <div class="apartment-images">
-                            <?php if (!empty($apt['images'])): ?>
-                                <img src="<?php echo $apt['images'][0]; ?>" alt="<?php echo htmlspecialchars($apt['name']); ?>">
-                                <?php if (count($apt['images']) > 1): ?>
-                                    <div class="image-count">
-                                        <span>📷 <?php echo count($apt['images']); ?> photos</span>
-                                    </div>
-                                <?php endif; ?>
-                            <?php else: ?>
-                                <div class="no-image">🏢</div>
-                            <?php endif; ?>
+            <!-- Organizations Grid -->
+            <div class="organizations-grid">
+                <?php foreach ($userOrganizations as $org): ?>
+                    <a href="organization_units.php?org_id=<?php echo $org['id']; ?>" class="organization-card">
+                        <div class="organization-icon">
+                            <div class="icon-circle">🏢</div>
                         </div>
                         
-                        <div class="apartment-content">
-                            <div class="apt-header">
-                                <h2><?php echo htmlspecialchars($apt['name']); ?></h2>
-                                <span class="my-unit-badge">Unit <?php echo htmlspecialchars($apt['my_unit']); ?></span>
+                        <div class="organization-content">
+                            <div class="org-header">
+                                <h2><?php echo htmlspecialchars($org['name']); ?></h2>
                             </div>
                             
-                            <p class="apt-address">📍 <?php echo htmlspecialchars($apt['address']); ?></p>
+                            <p class="org-address">📍 <?php echo htmlspecialchars($org['address']); ?></p>
                             
-                            <?php if (!empty($apt['description'])): ?>
-                                <p class="apt-description"><?php echo htmlspecialchars($apt['description']); ?></p>
-                            <?php endif; ?>
-                            
-                            <div class="apt-details">
-                                <div class="detail-item">
-                                    <span class="detail-icon">🏗️</span>
-                                    <span><?php echo $apt['property_type'] ?? 'Apartment'; ?></span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-icon">📅</span>
-                                    <span>Built <?php echo $apt['year_built'] ?? 'N/A'; ?></span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-icon">🏠</span>
-                                    <span><?php echo $apt['total_units']; ?> units</span>
-                                </div>
-                            </div>
-                            
-                            <?php if (!empty($apt['amenities'])): ?>
-                                <div class="amenities">
-                                    <?php foreach (array_slice($apt['amenities'], 0, 4) as $amenity): ?>
-                                        <span class="amenity-tag"><?php echo htmlspecialchars($amenity); ?></span>
-                                    <?php endforeach; ?>
-                                    <?php if (count($apt['amenities']) > 4): ?>
-                                        <span class="amenity-tag more">+<?php echo count($apt['amenities']) - 4; ?> more</span>
-                                    <?php endif; ?>
-                                </div>
+                            <?php if (!empty($org['description'])): ?>
+                                <p class="org-description"><?php echo htmlspecialchars($org['description']); ?></p>
                             <?php endif; ?>
                             
                             <div class="card-footer">
-                                <span class="submit-request-btn">Submit Request →</span>
+                                <span class="view-units-btn">View My Units →</span>
                             </div>
                         </div>
                     </a>
                 <?php endforeach; ?>
+                
+                <!-- Add New Organization Card -->
+                <a href="join_organization.php" class="organization-card add-card">
+                    <div class="add-card-content">
+                        <div class="add-icon">➕</div>
+                        <h3>Join New Organization</h3>
+                        <p>Add a new organization to manage</p>
+                    </div>
+                </a>
             </div>
         <?php endif; ?>
     </div>

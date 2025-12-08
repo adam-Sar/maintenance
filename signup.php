@@ -234,9 +234,6 @@ if ($result) {
                 unitInput.required = false;
             }
         }
-        
-        // Check on page load
-        window.addEventListener('DOMContentLoaded', toggleUnitField);
     </script>
 </body>
 </html>

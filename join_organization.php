@@ -31,50 +31,63 @@ $availableOrganizations = array_filter($allOrganizations, function($org) use ($u
     return !in_array($org['id'], $userOrgIds);
 });
 
+// Get available units for selected organization (via AJAX or initial load)
+$selectedOrgId = $_POST['organization_id'] ?? $_GET['org_id'] ?? null;
+$availableUnits = [];
+if ($selectedOrgId) {
+    $selectedOrgId = (int)$selectedOrgId;
+    // Get all units for this organization
+    $query = "SELECT * FROM units WHERE organization_id = $selectedOrgId ORDER BY name ASC";
+    $result = mysqli_query($conn, $query);
+    $allUnits = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    
+    // Get units user has already joined
+    $userId = (int)$user['id'];
+    $query = "SELECT unit_id FROM user_units WHERE user_id = $userId AND organization_id = $selectedOrgId";
+    $result = mysqli_query($conn, $query);
+    $userUnitIds = array_column(mysqli_fetch_all($result, MYSQLI_ASSOC), 'unit_id');
+    
+    // Filter to show only units user hasn't joined
+    $availableUnits = array_filter($allUnits, function($unit) use ($userUnitIds) {
+        return !in_array($unit['id'], $userUnitIds);
+    });
+}
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_organization'])) {
     $orgId = $_POST['organization_id'] ?? '';
-    $unitNumber = $_POST['unit_number'] ?? '';
+    $unitId = $_POST['unit_id'] ?? '';
     
     if (empty($orgId)) {
         $errorMessage = 'Please select an organization';
-    } elseif (empty($unitNumber)) {
-        $errorMessage = 'Please provide your unit number';
+    } elseif (empty($unitId)) {
+        $errorMessage = 'Please select a unit';
     } else {
-        // Check if user already in this organization
+        // Check if user already in this organization with this unit
         if (in_array($orgId, $userOrgIds)) {
             $errorMessage = 'You are already a member of this organization';
         } else {
-            // Database operations
-            global $conn;
-            
             $orgId = (int)$orgId;
-            $unitNumber = mysqli_real_escape_string($conn, $unitNumber);
+            $unitId = (int)$unitId;
+            $userId = (int)$user['id'];
             
-            // Check if unit exists
-            $query = "SELECT id FROM units WHERE organization_id = $orgId AND name = '$unitNumber'";
+            // Verify unit belongs to organization
+            $query = "SELECT id FROM units WHERE id = $unitId AND organization_id = $orgId";
             $result = mysqli_query($conn, $query);
             
-            if (mysqli_num_rows($result) > 0) {
-                $unit = mysqli_fetch_assoc($result);
-                $unitId = $unit['id'];
+            if (mysqli_num_rows($result) === 0) {
+                $errorMessage = 'Invalid unit selection';
             } else {
-                // Create new unit
-                $query = "INSERT INTO units (organization_id, name) VALUES ($orgId, '$unitNumber')";
-                mysqli_query($conn, $query);
-                $unitId = mysqli_insert_id($conn);
-            }
-            
-            // Link user to unit
-            $userId = (int)$user['id'];
-            $query = "INSERT INTO user_units (user_id, organization_id, unit_id, status) VALUES ($userId, $orgId, $unitId, 1)";
-            
-            if (mysqli_query($conn, $query)) {
-                $_SESSION['selected_org_id'] = $orgId;
-                header('Location: tenant_main.php?success=joined');
-                exit;
-            } else {
-                $errorMessage = "Error joining organization: " . mysqli_error($conn);
+                // Link user to unit
+                $query = "INSERT INTO user_units (user_id, organization_id, unit_id, status) VALUES ($userId, $orgId, $unitId, 1)";
+                
+                if (mysqli_query($conn, $query)) {
+                    $_SESSION['selected_org_id'] = $orgId;
+                    header('Location: tenant_main.php?success=joined');
+                    exit;
+                } else {
+                    $errorMessage = "Error joining organization: " . mysqli_error($conn);
+                }
             }
         }
     }
@@ -95,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_organization']))
                 <span>←</span> Back
             </a>
             <h1>Join New Organization</h1>
-            <p>Select an organization and enter your unit number</p>
+            <p>Select an organization and a unit to join</p>
         </div>
 
         <div class="form-container">
@@ -110,17 +123,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_organization']))
                     <div class="empty-icon">🎉</div>
                     <h2>All Set!</h2>
                     <p>You're already a member of all available organizations.</p>
-                    <a href="tenant_main.php" class="btn-primary">Back to My Apartments</a>
+                    <a href="tenant_main.php" class="btn-primary">Back to My Organizations</a>
                 </div>
             <?php else: ?>
                 <form method="POST" id="joinForm">
                     <div class="form-group">
                         <label for="organization_id">Select Organization *</label>
-                        <select name="organization_id" id="organization_id" required onchange="showOrgInfo()">
+                        <select name="organization_id" id="organization_id" required onchange="loadUnits()">
                             <option value="">Choose an organization...</option>
                             <?php foreach ($availableOrganizations as $org): ?>
                                 <option value="<?php echo $org['id']; ?>" 
-                                        data-address="<?php echo htmlspecialchars($org['address'] ?? ''); ?>">
+                                        data-address="<?php echo htmlspecialchars($org['address'] ?? ''); ?>"
+                                        <?php echo ($selectedOrgId == $org['id']) ? 'selected' : ''; ?>>
                                     <?php echo htmlspecialchars($org['name']); ?>
                                 </option>
                             <?php endforeach; ?>
@@ -128,18 +142,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_organization']))
                         <div class="org-info" id="orgInfo"></div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="unit_number">Your Unit Number *</label>
-                        <input type="text" 
-                               name="unit_number" 
-                               id="unit_number" 
-                               placeholder="e.g., A-201, 3B, 105" 
-                               required>
-                        <small>Enter your apartment/unit number in this building</small>
+                    <div class="form-group" id="unitGroup" style="<?php echo empty($availableUnits) ? 'display:none;' : ''; ?>">
+                        <label for="unit_id">Select Unit *</label>
+                        <select name="unit_id" id="unit_id" required>
+                            <option value="">Choose a unit...</option>
+                            <?php foreach ($availableUnits as $unit): ?>
+                                <option value="<?php echo $unit['id']; ?>">
+                                    Unit <?php echo htmlspecialchars($unit['name']); ?>
+                                    <?php if (!empty($unit['description'])): ?>
+                                        - <?php echo htmlspecialchars($unit['description']); ?>
+                                    <?php endif; ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <small>Select from available units in this organization</small>
+                    </div>
+
+                    <div id="noUnitsMessage" style="display:none;" class="info-message">
+                        <p>⚠️ No available units in this organization. All units are already assigned to you or no units have been created yet.</p>
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" name="join_organization" class="btn-submit">
+                        <button type="submit" name="join_organization" class="btn-submit" id="submitBtn" 
+                                <?php echo empty($availableUnits) && $selectedOrgId ? 'disabled' : ''; ?>>
                             Join Organization
                         </button>
                         <a href="tenant_main.php" class="btn-cancel">Cancel</a>
@@ -172,6 +197,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_organization']))
                 orgInfo.innerHTML = '';
             }
         }
+
+        function loadUnits() {
+            const orgId = document.getElementById('organization_id').value;
+            const unitGroup = document.getElementById('unitGroup');
+            const noUnitsMsg = document.getElementById('noUnitsMessage');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (!orgId) {
+                unitGroup.style.display = 'none';
+                noUnitsMsg.style.display = 'none';
+                submitBtn.disabled = true;
+                return;
+            }
+            
+            showOrgInfo();
+            
+            // Reload page with selected org to get units
+            window.location.href = 'join_organization.php?org_id=' + orgId;
+        }
+
+        // Show org info on page load if org is selected
+        <?php if ($selectedOrgId): ?>
+        showOrgInfo();
+        <?php endif; ?>
     </script>
 </body>
 </html>

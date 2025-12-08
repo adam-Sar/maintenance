@@ -14,36 +14,38 @@ if (!$user || $user['role'] !== 'tenant') {
     exit;
 }
 
-$aptId = $_GET['apt_id'] ?? null;
-if (!$aptId) {
+$unitId = $_GET['unit_id'] ?? null;
+$orgId = $_GET['org_id'] ?? null;
+
+if (!$unitId || !$orgId) {
     header('Location: tenant_main.php');
     exit;
 }
 
-$apartment = getOrganizationById($aptId);
-if (!$apartment) {
+// Get organization details
+$organization = getOrganizationById($orgId);
+if (!$organization) {
     header('Location: tenant_main.php');
     exit;
 }
 
-// Get user's unit in this apartment
-$userDeptRelations = getUserDepartments($user['id'], $aptId);
-if (empty($userDeptRelations)) {
+// Get unit details
+$unit = getDepartmentById($unitId);
+if (!$unit) {
+    header('Location: organization_units.php?org_id=' . $orgId);
+    exit;
+}
+
+// Verify user has access to this unit
+if (!isUserInDepartment($user['id'], $unitId)) {
     header('Location: tenant_main.php?error=no_access');
     exit;
 }
 
-// In SQL schema, we assume one unit per org per user for now, or take the first one
-$myUnitRelation = $userDeptRelations[0];
-$myUnitName = $myUnitRelation['unit_name'];
-$myUnitId = $myUnitRelation['unit_id'];
+// Get all complaints for this unit by this user
+$myComplaints = getComplaintsByDepartment($unitId, $user['id']);
 
-// Get all complaints for this apartment by this user
-// We use getComplaintsByUser and filter by org
-$allUserComplaints = getComplaintsByUser($user['id']);
-$myComplaints = array_filter($allUserComplaints, fn($c) => $c['organization_id'] == $aptId);
-
-// Sort by submitted date (newest first) - already sorted by query but good to ensure
+// Sort by submitted date (newest first)
 usort($myComplaints, function($a, $b) {
     return strtotime($b['submitted_at']) - strtotime($a['submitted_at']);
 });
@@ -56,28 +58,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
     $category = $_POST['category'] ?? '';
     $title = $_POST['title'] ?? '';
     $description = $_POST['description'] ?? '';
-    $priority = $_POST['priority'] ?? 'medium'; // Not in DB schema but kept for UI if needed
+    $priority = $_POST['priority'] ?? 'medium';
     
     if (empty($category) || empty($title) || empty($description)) {
         $errorMessage = 'Please fill in all required fields';
     } else {
         global $conn;
         
-        $aptId = (int)$aptId;
+        $orgIdInt = (int)$orgId;
         $userId = (int)$user['id'];
-        $myUnitId = (int)$myUnitId;
+        $unitIdInt = (int)$unitId;
         $category = mysqli_real_escape_string($conn, $category);
         $title = mysqli_real_escape_string($conn, $title);
         $description = mysqli_real_escape_string($conn, $description);
         
-        $query = "INSERT INTO complaints (organization_id, user_id, unit_id, category, title, description, status) VALUES ($aptId, $userId, $myUnitId, '$category', '$title', '$description', 'pending')";
+        $query = "INSERT INTO complaints (organization_id, user_id, unit_id, category, title, description, status) VALUES ($orgIdInt, $userId, $unitIdInt, '$category', '$title', '$description', 'pending')";
         
         if (mysqli_query($conn, $query)) {
             $successMessage = 'Maintenance request submitted successfully!';
             
             // Refresh complaints
-            $allUserComplaints = getComplaintsByUser($user['id']);
-            $myComplaints = array_filter($allUserComplaints, fn($c) => $c['organization_id'] == $aptId);
+            $myComplaints = getComplaintsByDepartment($unitId, $user['id']);
         } else {
             $errorMessage = 'Error submitting request: ' . mysqli_error($conn);
         }
@@ -89,23 +90,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($apartment['name']); ?> - Maintenance</title>
-    <link rel="stylesheet" href="apartment_detail.css">
+    <title>Unit <?php echo htmlspecialchars($unit['name']); ?> - Maintenance</title>
+    <link rel="stylesheet" href="unit_detail.css">
 </head>
 <body>
     <!-- Header -->
     <div class="page-header">
         <div class="header-container">
-            <a href="tenant_main.php" class="back-btn">
-                <span>←</span> Back to My Apartments
+            <a href="organization_units.php?org_id=<?php echo $orgId; ?>" class="back-btn">
+                <span>←</span> Back to Units
             </a>
-            <div class="apt-header-info">
+            <div class="unit-header-info">
                 <div class="header-details">
-                    <h1><?php echo htmlspecialchars($apartment['name']); ?></h1>
-                    <p class="apt-address">📍 <?php echo htmlspecialchars($apartment['address']); ?></p>
+                    <h1><?php echo htmlspecialchars($organization['name']); ?></h1>
+                    <p class="org-address">📍 <?php echo htmlspecialchars($organization['address']); ?></p>
                     <div class="header-meta">
-                        <span class="my-unit">🏠 My Unit: <strong><?php echo htmlspecialchars($myUnitName); ?></strong></span>
-                        <span>🏗️ Apartment Complex</span>
+                        <span class="my-unit">🏠 My Unit: <strong><?php echo htmlspecialchars($unit['name']); ?></strong></span>
+                        <span>🏗️ Property Unit</span>
                     </div>
                 </div>
             </div>
