@@ -60,13 +60,13 @@ body {
     border-color: #cbd5e1;
 }
 
-.dept-info {
+.unit-info {
     display: flex;
     align-items: center;
     gap: 24px;
 }
 
-.dept-icon-large {
+.unit-icon-large {
     width: 80px;
     height: 80px;
     border-radius: 20px;
@@ -79,7 +79,7 @@ body {
     border: 1px solid #ede9fe;
 }
 
-.dept-info h1 {
+.unit-info h1 {
     font-size: 36px;
     font-weight: 800;
     margin-bottom: 8px;
@@ -87,7 +87,7 @@ body {
     letter-spacing: -0.02em;
 }
 
-.dept-info p {
+.unit-info p {
     font-size: 16px;
     color: #64748b;
 }
@@ -340,27 +340,4 @@ body {
     color: #475569;
     line-height: 1.6;
     font-size: 15px;
-}
-
-@media (max-width: 768px) {
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-
-    .dept-info h1 {
-        font-size: 28px;
-    }
-
-    .page-content {
-        padding: 30px 20px;
-    }
-
-    .btn-submit {
-        width: 100%;
-    }
-
-    .dept-info {
-        flex-direction: column;
-        text-align: center;
-    }
 }

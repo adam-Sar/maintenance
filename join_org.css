@@ -253,22 +253,3 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
 }
-
-@media (max-width: 768px) {
-    .page-header h1 {
-        font-size: 28px;
-    }
-
-    .form-container {
-        padding: 30px 20px;
-    }
-
-    .form-actions {
-        flex-direction: column;
-    }
-
-    .info-card {
-        flex-direction: column;
-        gap: 10px;
-    }
-}

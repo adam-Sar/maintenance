@@ -353,26 +353,3 @@ body {
     color: #2563eb;
     border: 1px solid #dbeafe;
 }
-
-/* Responsive */
-@media (max-width: 768px) {
-    .dashboard-content {
-        padding: 20px 15px;
-    }
-
-    .header-content h1 {
-        font-size: 20px;
-    }
-
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-
-    .complaint-header {
-        flex-direction: column;
-    }
-
-    .btn-submit {
-        width: 100%;
-    }
-}

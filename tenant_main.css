@@ -283,20 +283,20 @@ body {
     margin: 0;
 }
 
-/* Departments Container */
-.departments-container {
+/* Units Container */
+.units-container {
     max-width: 1400px;
     margin: 0 auto;
 }
 
-.departments-grid {
+.units-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
     gap: 24px;
 }
 
-/* Department Card */
-.department-card {
+/* Unit Card */
+.unit-card {
     background: white;
     border-radius: 20px;
     padding: 28px;
@@ -312,25 +312,25 @@ body {
     border: 1px solid #f1f5f9;
 }
 
-.department-card:hover {
+.unit-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
     border-color: #e2e8f0;
 }
 
-.department-card.add-dept {
+.unit-card.add-unit {
     border-left-color: #e2e8f0;
     border-style: dashed;
     border-width: 2px;
     background: #f8fafc;
 }
 
-.department-card.add-dept:hover {
+.unit-card.add-unit:hover {
     border-color: #8b5cf6;
     background: white;
 }
 
-.dept-icon {
+.unit-icon {
     width: 64px;
     height: 64px;
     border-radius: 16px;
@@ -344,37 +344,37 @@ body {
     border: 1px solid #ede9fe;
 }
 
-.dept-icon.add {
+.unit-icon.add {
     background: white;
     color: #94a3b8;
     border-color: #e2e8f0;
 }
 
-.department-card.add-dept:hover .dept-icon.add {
+.unit-card.add-unit:hover .unit-icon.add {
     color: #8b5cf6;
     border-color: #8b5cf6;
     background: #f5f3ff;
 }
 
-.dept-content {
+.unit-content {
     flex: 1;
 }
 
-.dept-content h3 {
+.unit-content h3 {
     font-size: 18px;
     font-weight: 700;
     color: #1e293b;
     margin-bottom: 6px;
 }
 
-.dept-content p {
+.unit-content p {
     font-size: 14px;
     color: #64748b;
     line-height: 1.5;
     margin-bottom: 12px;
 }
 
-.dept-meta {
+.unit-meta {
     display: flex;
     gap: 16px;
     font-size: 13px;
@@ -387,13 +387,13 @@ body {
     gap: 6px;
 }
 
-.dept-arrow {
+.unit-arrow {
     font-size: 24px;
     color: #cbd5e1;
     transition: all 0.3s ease;
 }
 
-.department-card:hover .dept-arrow {
+.unit-card:hover .unit-arrow {
     color: #8b5cf6;
     transform: translateX(4px);
 }
@@ -446,33 +446,4 @@ body {
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .main-content {
-        padding: 100px 20px 20px;
-    }
-
-    .top-bar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .org-dropdown-btn {
-        width: 100%;
-    }
-
-    .org-dropdown {
-        width: 100%;
-        left: 0;
-    }
-
-    .departments-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .page-title h1 {
-        font-size: 26px;
-    }
 }

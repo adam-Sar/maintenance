@@ -28,7 +28,7 @@ if (!$organization) {
 }
 
 // Get user's units within this organization
-$userUnits = getUserDepartments($user['id'], $orgId);
+$userUnits = getUserUnits($user['id'], $orgId);
 
 // Get all units in this organization
 global $conn;
@@ -73,11 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_unit'])) {
             if (mysqli_num_rows($checkResult) > 0) {
                 $errorMessage = 'You have already joined this unit';
             } else {
-                // Add user to unit
-                $query = "INSERT INTO user_units (user_id, organization_id, unit_id, status) VALUES ($userId, $orgIdInt, $unitId, 1)";
+                // Add user to unit with pending status (0)
+                $query = "INSERT INTO user_units (user_id, organization_id, unit_id, status) VALUES ($userId, $orgIdInt, $unitId, 0)";
                 
                 if (mysqli_query($conn, $query)) {
-                    header("Location: organization_units.php?org_id=$orgId&success=joined");
+                    header("Location: organization_units.php?org_id=$orgId&success=pending");
                     exit;
                 } else {
                     $errorMessage = "Error joining unit: " . mysqli_error($conn);
@@ -148,6 +148,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_unit'])) {
         <?php if (isset($_GET['success']) && $_GET['success'] === 'joined'): ?>
             <div class="success-alert">
                 ✓ Successfully joined unit! You can now submit maintenance requests.
+            </div>
+        <?php elseif (isset($_GET['success']) && $_GET['success'] === 'pending'): ?>
+            <div class="success-alert" style="background: #fff7ed; color: #9a3412; border-color: #ffedd5;">
+                ✓ Request submitted! Your membership is pending approval from the landlord.
             </div>
         <?php endif; ?>
 

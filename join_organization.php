@@ -78,12 +78,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_organization']))
             if (mysqli_num_rows($result) === 0) {
                 $errorMessage = 'Invalid unit selection';
             } else {
-                // Link user to unit
-                $query = "INSERT INTO user_units (user_id, organization_id, unit_id, status) VALUES ($userId, $orgId, $unitId, 1)";
+                // Link user to unit with pending status (0)
+                $query = "INSERT INTO user_units (user_id, organization_id, unit_id, status) VALUES ($userId, $orgId, $unitId, 0)";
                 
                 if (mysqli_query($conn, $query)) {
                     $_SESSION['selected_org_id'] = $orgId;
-                    header('Location: tenant_main.php?success=joined');
+                    header('Location: tenant_main.php?success=pending');
                     exit;
                 } else {
                     $errorMessage = "Error joining organization: " . mysqli_error($conn);

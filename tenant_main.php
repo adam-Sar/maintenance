@@ -91,8 +91,10 @@ if (isset($_GET['logout'])) {
             <div class="success-alert">
                 <?php if ($_GET['success'] === 'joined'): ?>
                     ✓ Successfully joined organization! You can now submit maintenance requests.
-                <?php elseif ($_GET['success'] === 'joined_dept'): ?>
+                <?php elseif ($_GET['success'] === 'joined_unit'): ?>
                     ✓ Successfully joined organization!
+                <?php elseif ($_GET['success'] === 'pending'): ?>
+                    ✓ Request submitted! Your membership is pending approval from the landlord.
                 <?php endif; ?>
             </div>
         <?php endif; ?>

@@ -202,7 +202,7 @@ if (isset($_GET['logout'])) {
                         ?>
                         <div class="request-card">
                             <div class="request-header">
-                                <div class="dept-badge">
+                                <div class="unit-badge">
                                     📁 <?php echo htmlspecialchars($complaint['category']); ?>
                                 </div>
                                 <div class="badges">

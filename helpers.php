@@ -77,16 +77,15 @@ function formatDateTime($datetime) {
     return date('M d, Y g:i A', strtotime($datetime));
 }
 
-function getDepartmentsByOrganization($organizationId) {
+function getUnitsByOrganization($organizationId) {
     global $conn;
     $organizationId = (int)$organizationId;
-    // Mapping 'departments' to 'units' table
     $query = "SELECT * FROM units WHERE organization_id = $organizationId";
     $result = mysqli_query($conn, $query);
     return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
-function getUserDepartments($userId, $organizationId = null) {
+function getUserUnits($userId, $organizationId = null) {
     global $conn;
     $userId = (int)$userId;
     
@@ -96,14 +95,14 @@ function getUserDepartments($userId, $organizationId = null) {
             SELECT uu.*, u.name as unit_name, u.description as unit_description 
             FROM user_units uu
             JOIN units u ON uu.unit_id = u.id
-            WHERE uu.user_id = $userId AND uu.organization_id = $organizationId
+            WHERE uu.user_id = $userId AND uu.organization_id = $organizationId AND uu.status = 1
         ";
     } else {
         $query = "
             SELECT uu.*, u.name as unit_name, u.description as unit_description 
             FROM user_units uu
             JOIN units u ON uu.unit_id = u.id
-            WHERE uu.user_id = $userId
+            WHERE uu.user_id = $userId AND uu.status = 1
         ";
     }
     
@@ -124,35 +123,35 @@ function getUserOrganizations($userId) {
     return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
-function getDepartmentById($departmentId) {
+function getUnitById($unitId) {
     global $conn;
-    $departmentId = (int)$departmentId;
-    $query = "SELECT * FROM units WHERE id = $departmentId";
+    $unitId = (int)$unitId;
+    $query = "SELECT * FROM units WHERE id = $unitId";
     $result = mysqli_query($conn, $query);
     return mysqli_fetch_assoc($result);
 }
 
-function getComplaintsByDepartment($departmentId, $userId = null) {
+function getComplaintsByUnit($unitId, $userId = null) {
     global $conn;
-    $departmentId = (int)$departmentId;
+    $unitId = (int)$unitId;
     
     if ($userId) {
         $userId = (int)$userId;
-        $query = "SELECT * FROM complaints WHERE unit_id = $departmentId AND user_id = $userId ORDER BY submitted_at DESC";
+        $query = "SELECT * FROM complaints WHERE unit_id = $unitId AND user_id = $userId ORDER BY submitted_at DESC";
     } else {
-        $query = "SELECT * FROM complaints WHERE unit_id = $departmentId ORDER BY submitted_at DESC";
+        $query = "SELECT * FROM complaints WHERE unit_id = $unitId ORDER BY submitted_at DESC";
     }
     
     $result = mysqli_query($conn, $query);
     return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
-function isUserInDepartment($userId, $departmentId) {
+function isUserInUnit($userId, $unitId) {
     global $conn;
     $userId = (int)$userId;
-    $departmentId = (int)$departmentId;
+    $unitId = (int)$unitId;
     
-    $query = "SELECT id FROM user_units WHERE user_id = $userId AND unit_id = $departmentId";
+    $query = "SELECT id FROM user_units WHERE user_id = $userId AND unit_id = $unitId";
     $result = mysqli_query($conn, $query);
     return mysqli_num_rows($result) > 0;
 }

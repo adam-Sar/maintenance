@@ -293,7 +293,7 @@ body {
     flex-wrap: wrap;
 }
 
-.dept-badge {
+.unit-badge {
     padding: 6px 12px;
     border-radius: 8px;
     font-size: 13px;
@@ -373,49 +373,4 @@ body {
     color: #94a3b8;
     padding-top: 16px;
     border-top: 1px solid #f1f5f9;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-    .content-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .apt-header-info {
-        flex-direction: column;
-        text-align: center;
-        align-items: center;
-    }
-
-    .header-details h1 {
-        font-size: 32px;
-    }
-
-    .apt-address {
-        justify-content: center;
-    }
-
-    .header-meta {
-        justify-content: center;
-    }
-}
-
-@media (max-width: 768px) {
-    .page-content {
-        padding: 30px 20px;
-    }
-
-    .form-section,
-    .requests-section {
-        padding: 24px;
-    }
-
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-
-    .header-image {
-        width: 160px;
-        height: 160px;
-    }
 }

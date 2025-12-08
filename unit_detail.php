@@ -30,20 +30,20 @@ if (!$organization) {
 }
 
 // Get unit details
-$unit = getDepartmentById($unitId);
+$unit = getUnitById($unitId);
 if (!$unit) {
     header('Location: organization_units.php?org_id=' . $orgId);
     exit;
 }
 
 // Verify user has access to this unit
-if (!isUserInDepartment($user['id'], $unitId)) {
+if (!isUserInUnit($user['id'], $unitId)) {
     header('Location: tenant_main.php?error=no_access');
     exit;
 }
 
 // Get all complaints for this unit by this user
-$myComplaints = getComplaintsByDepartment($unitId, $user['id']);
+$myComplaints = getComplaintsByUnit($unitId, $user['id']);
 
 // Sort by submitted date (newest first)
 usort($myComplaints, function($a, $b) {
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
             $successMessage = 'Maintenance request submitted successfully!';
             
             // Refresh complaints
-            $myComplaints = getComplaintsByDepartment($unitId, $user['id']);
+            $myComplaints = getComplaintsByUnit($unitId, $user['id']);
         } else {
             $errorMessage = 'Error submitting request: ' . mysqli_error($conn);
         }
@@ -182,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
                         <?php foreach ($myComplaints as $complaint): ?>
                             <div class="request-card">
                                 <div class="request-header">
-                                    <div class="dept-badge">
+                                    <div class="unit-badge">
                                         📁 <?php echo htmlspecialchars($complaint['category']); ?>
                                     </div>
                                     <div class="badges">
