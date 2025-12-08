@@ -241,23 +241,8 @@ body {
     letter-spacing: 0.02em;
 }
 
-.priority-high {
-    background: #fef2f2;
-    color: #ef4444;
-    border: 1px solid #fee2e2;
-}
 
-.priority-medium {
-    background: #fff7ed;
-    color: #f97316;
-    border: 1px solid #ffedd5;
-}
 
-.priority-low {
-    background: #eff6ff;
-    color: #3b82f6;
-    border: 1px solid #dbeafe;
-}
 
 .status-pending {
     background: #fff7ed;

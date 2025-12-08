@@ -61,28 +61,6 @@ body {
     border-color: #cbd5e1;
 }
 
-.apt-header-info {
-    display: flex;
-    gap: 40px;
-    align-items: flex-start;
-}
-
-.header-image {
-    width: 200px;
-    height: 200px;
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-    flex-shrink: 0;
-    border: 4px solid white;
-}
-
-.header-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
 .header-details {
     flex: 1;
     padding-top: 10px;
@@ -97,7 +75,7 @@ body {
     line-height: 1.1;
 }
 
-.apt-address {
+.org-address {
     font-size: 18px;
     color: #64748b;
     margin-bottom: 24px;
@@ -105,6 +83,7 @@ body {
     align-items: center;
     gap: 8px;
 }
+
 
 .header-meta {
     display: flex;
