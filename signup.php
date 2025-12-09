@@ -12,13 +12,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
     $organization_id = $_POST['organization_id'] ?? '';
+    $new_org_name = $_POST['new_org_name'] ?? '';
     $unit_number = $_POST['unit_number'] ?? '';
     
     // Validation
-    if (empty($role) || empty($name) || empty($email) || empty($password) || empty($confirm_password) || empty($organization_id)) {
+    // Validation
+    if (empty($role) || empty($name) || empty($email) || empty($password) || empty($confirm_password)) {
         $error = 'Please fill in all required fields';
-    } elseif ($role === 'tenant' && empty($unit_number)) {
-        $error = 'Tenants must provide a unit number';
+    } elseif ($role === 'tenant' && (empty($organization_id) || empty($unit_number))) {
+        $error = 'Tenants must select an organization and provide a unit number';
+    } elseif ($role === 'landlord' && empty($new_org_name)) {
+        $error = 'Landlords must provide an organization name';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Please enter a valid email address';
     } elseif (getUserByEmail($email)) {
@@ -49,8 +53,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             $user_id = mysqli_insert_id($conn);
             
+            // Handle Landlord Organization Creation
+            if ($role === 'landlord') {
+                $new_org_name = mysqli_real_escape_string($conn, $new_org_name);
+                $query = "INSERT INTO organizations (name, admin_id) VALUES ('$new_org_name', $user_id)";
+                if (!mysqli_query($conn, $query)) {
+                    throw new Exception("Error creating organization: " . mysqli_error($conn));
+                }
+            }
             // Handle Tenant Unit Linking
-            if ($role === 'tenant' && !empty($unit_number)) {
+            elseif ($role === 'tenant' && !empty($unit_number)) {
                 $organization_id = (int)$organization_id;
                 $unit_number = mysqli_real_escape_string($conn, $unit_number);
                 
@@ -137,12 +149,11 @@ if ($result) {
                 </select>
             </div>
             
-            <div class="form-group">
+            <div class="form-group" id="org-select-group">
                 <label for="organization_id">Organization / Apartment Complex *</label>
                 <select 
                     id="organization_id" 
                     name="organization_id" 
-                    required
                     style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px; font-family: 'Inter', sans-serif; background: white; cursor: pointer;"
                 >
                     <option value="">Select your organization...</option>
@@ -153,6 +164,17 @@ if ($result) {
                     }
                     ?>
                 </select>
+            </div>
+
+            <div class="form-group" id="new-org-group" style="display: none;">
+                <label for="new_org_name">Organization Name</label>
+                <input 
+                    type="text" 
+                    id="new_org_name" 
+                    name="new_org_name" 
+                    placeholder="Enter your organization name"
+                    value="<?php echo htmlspecialchars($_POST['new_org_name'] ?? ''); ?>"
+                >
             </div>
             
             <div class="form-group" id="unit-field" style="display: none;">
@@ -225,15 +247,48 @@ if ($result) {
             const role = document.getElementById('role').value;
             const unitField = document.getElementById('unit-field');
             const unitInput = document.getElementById('unit_number');
+            const orgSelectGroup = document.getElementById('org-select-group');
+            const orgSelect = document.getElementById('organization_id');
+            const newOrgGroup = document.getElementById('new-org-group');
+            const newOrgInput = document.getElementById('new_org_name');
             
             if (role === 'tenant') {
                 unitField.style.display = 'block';
                 unitInput.required = true;
-            } else {
+                
+                orgSelectGroup.style.display = 'block';
+                orgSelect.required = true;
+                
+                newOrgGroup.style.display = 'none';
+                newOrgInput.required = false;
+            } else if (role === 'landlord') {
                 unitField.style.display = 'none';
                 unitInput.required = false;
+                
+                orgSelectGroup.style.display = 'none';
+                orgSelect.required = false;
+                
+                newOrgGroup.style.display = 'block';
+                newOrgInput.required = true;
+            } else {
+                // Default state (no selection)
+                unitField.style.display = 'none';
+                unitInput.required = false;
+                orgSelectGroup.style.display = 'block'; // Or hide, but let's default to visible as per original, or maybe hide both? 
+                // Original code showed org select by default. Let's toggle based on role presence.
+                // If no role selected, maybe just hide specific fields? 
+                // Let's set default:
+                if (role === '') {
+                     orgSelectGroup.style.display = 'block'; // Keep it visible or hide? Let's hide tenant fields, keeping behavior simple.
+                     orgSelect.required = false; // Not required yet
+                     newOrgGroup.style.display = 'none';
+                     newOrgInput.required = false;
+                }
             }
         }
+        
+        // Run on load
+        toggleUnitField();
     </script>
 </body>
 </html>
