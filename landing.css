@@ -100,7 +100,7 @@ body {
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(135deg, #e0e7ff 0%, #f5f3ff 50%, #fae8ff 100%);
+    background: linear-gradient(to right, #e0e7ff 0%, #f5f3ff 50%, #fae8ff 100%);
     padding: 100px 0;
     position: relative;
     overflow: hidden;

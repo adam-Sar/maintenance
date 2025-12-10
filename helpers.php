@@ -5,7 +5,7 @@ require_once __DIR__ . '/db_connect.php';
 
 function getUserByEmail($email) {
     global $conn;
-    $email = mysqli_real_escape_string($conn, $email);
+    $email = mysqli_real_escape_string($conn, $email);  
     $query = "SELECT * FROM users WHERE email = '$email'";
     $result = mysqli_query($conn, $query);
     return mysqli_fetch_assoc($result);

@@ -8,9 +8,33 @@
 
 body {
     font-family: 'Outfit', sans-serif;
-    background: #f8fafc;
     min-height: 100vh;
     color: #1e293b;
+    background: linear-gradient(to right, #e0e7ff 0%, #f5f3ff 50%, #fae8ff 100%);
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before,
+body::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+}
+
+body::before {
+    width: 500px;
+    height: 500px;
+    top: -200px;
+    right: -100px;
+}
+
+body::after {
+    width: 300px;
+    height: 300px;
+    bottom: -100px;
+    left: -50px;
 }
 
 /* Page Header */

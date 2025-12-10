@@ -123,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_unit'])) {
                 <span class="nav-icon">📋</span>
                 <span>All Requests</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="profile.php" class="nav-item">
                 <span class="nav-icon">👤</span>
                 <span>Profile</span>
             </a>
