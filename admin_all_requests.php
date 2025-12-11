@@ -96,11 +96,10 @@ if (isset($_GET['logout'])) {
     <link rel="stylesheet" href="admin_styles.css">
     <style>
         /* Shared styles fix */
-        body { background: #f8fafc; }
         .page-title h1 { color: #1e293b; }
         .dashboard-content { padding-top: 0; }
         .complaints-section { margin-top: 20px; }
-        
+
         /* Sidebar active state */
         .sidebar-nav .nav-item.active {
             background: #f5f3ff;
@@ -296,7 +295,9 @@ if (isset($_GET['logout'])) {
     <script>
         function toggleMenu() {
             const sidebar = document.getElementById('sidebar');
+            const hamburger = document.getElementById('hamburgerMenu');
             sidebar.classList.toggle('active');
+            hamburger.classList.toggle('shifted');
         }
 
         // Close sidebar when clicking outside
@@ -306,6 +307,7 @@ if (isset($_GET['logout'])) {
             
             if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
                 sidebar.classList.remove('active');
+                hamburger.classList.remove('shifted');
             }
         });
 

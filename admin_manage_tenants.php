@@ -77,7 +77,6 @@ if (isset($_GET['logout'])) {
     <link rel="stylesheet" href="all_requests.css"> <!-- Reusing table styles -->
     <link rel="stylesheet" href="admin_styles.css">
     <style>
-        body { background: #f8fafc; }
         .dashboard-content { padding-top: 0; }
         
         /* Table Styles Override/Specifics */
@@ -271,7 +270,9 @@ if (isset($_GET['logout'])) {
     <script>
         function toggleMenu() {
             const sidebar = document.getElementById('sidebar');
+            const hamburger = document.getElementById('hamburgerMenu');
             sidebar.classList.toggle('active');
+            hamburger.classList.toggle('shifted');
         }
 
         // Close sidebar when clicking outside
@@ -280,6 +281,7 @@ if (isset($_GET['logout'])) {
             const hamburger = document.getElementById('hamburgerMenu');
             if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
                 sidebar.classList.remove('active');
+                hamburger.classList.remove('shifted');
             }
         });
     </script>

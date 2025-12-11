@@ -231,7 +231,9 @@ if (isset($_GET['logout'])) {
     <script>
         function toggleMenu() {
             const sidebar = document.getElementById('sidebar');
+            const hamburger = document.querySelector('.hamburger-menu');
             sidebar.classList.toggle('active');
+            hamburger.classList.toggle('shifted');
         }
 
         function applyFilter() {

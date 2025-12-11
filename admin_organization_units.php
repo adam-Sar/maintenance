@@ -8,6 +8,13 @@ if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true)
     exit;
 }
 
+// Logout handling
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header('Location: login.php');
+    exit;
+}
+
 $user = getUserByEmail($_SESSION['user_email']);
 if (!$user || $user['role'] !== 'landlord') {
     header('Location: tenant_main.php');
@@ -63,11 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_unit'])) {
 $units = getUnitsByOrganization($orgId);
 
 // Logout handling
-if (isset($_GET['logout'])) {
-    session_destroy();
-    header('Location: login.php');
-    exit;
-}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -233,7 +236,9 @@ if (isset($_GET['logout'])) {
     <script>
         function toggleMenu() {
             const sidebar = document.getElementById('sidebar');
+            const hamburger = document.getElementById('hamburgerMenu');
             sidebar.classList.toggle('active');
+            hamburger.classList.toggle('shifted');
         }
 
         // Close sidebar when clicking outside
@@ -243,6 +248,7 @@ if (isset($_GET['logout'])) {
             
             if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
                 sidebar.classList.remove('active');
+                hamburger.classList.remove('shifted');
             }
         });
     </script>

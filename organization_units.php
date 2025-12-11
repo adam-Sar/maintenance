@@ -2,8 +2,15 @@
 session_start();
 require_once 'helpers.php';
 
-// Check if user is logged in and is a tenant
+// Check if user is logged in
 if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
+    header('Location: login.php');
+    exit;
+}
+
+// Logout handling
+if (isset($_GET['logout'])) {
+    session_destroy();
     header('Location: login.php');
     exit;
 }
@@ -241,7 +248,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_unit'])) {
     <script>
         function toggleMenu() {
             const sidebar = document.getElementById('sidebar');
+            const hamburger = document.getElementById('hamburgerMenu');
             sidebar.classList.toggle('active');
+            hamburger.classList.toggle('shifted');
         }
 
         // Close sidebar when clicking outside
@@ -251,6 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_unit'])) {
             
             if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
                 sidebar.classList.remove('active');
+                hamburger.classList.remove('shifted');
             }
         });
 

@@ -143,7 +143,9 @@ if (isset($_GET['logout'])) {
     <script>
         function toggleMenu() {
             const sidebar = document.getElementById('sidebar');
+            const hamburger = document.getElementById('hamburgerMenu');
             sidebar.classList.toggle('active');
+            hamburger.classList.toggle('shifted');
         }
 
         // Close sidebar when clicking outside
@@ -153,6 +155,7 @@ if (isset($_GET['logout'])) {
             
             if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
                 sidebar.classList.remove('active');
+                hamburger.classList.remove('shifted');
             }
         });
     </script>
