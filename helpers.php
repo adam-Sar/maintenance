@@ -155,3 +155,46 @@ function isUserInUnit($userId, $unitId) {
     $result = mysqli_query($conn, $query);
     return mysqli_num_rows($result) > 0;
 }
+
+function getLandlordOrganizations($adminId) {
+    global $conn;
+    $adminId = (int)$adminId;
+    $query = "SELECT * FROM organizations WHERE admin_id = $adminId";
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
+
+function getAllLandlordComplaints($adminId) {
+    global $conn;
+    $adminId = (int)$adminId;
+    $query = "
+        SELECT c.*, u.name as unit_number, o.name as org_name, o.address as org_address
+        FROM complaints c
+        JOIN units u ON c.unit_id = u.id
+        JOIN organizations o ON c.organization_id = o.id
+        WHERE o.admin_id = $adminId
+        ORDER BY c.submitted_at DESC
+    ";
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
+
+function getLandlordTenantRequests($adminId) {
+    global $conn;
+    $adminId = (int)$adminId;
+    $query = "
+        SELECT uu.id as link_id, uu.status as status,
+               u.name as tenant_name, u.email as tenant_email,
+               un.name as unit_number,
+               o.name as org_name
+        FROM user_units uu
+        JOIN users u ON uu.user_id = u.id
+        JOIN units un ON uu.unit_id = un.id
+        JOIN organizations o ON uu.organization_id = o.id
+        WHERE o.admin_id = $adminId
+        ORDER BY uu.status ASC, uu.id DESC
+    ";
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
+

@@ -89,9 +89,9 @@ if (isset($_GET['logout'])) {
                 <span class="nav-icon">📋</span>
                 <span>All Requests</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="profile.php" class="nav-item">
                 <span class="nav-icon">👤</span>
-                <span>Profile Settings</span>
+                <span>Profile</span>
             </a>
             <a href="?logout=1" class="nav-item">
                 <span class="nav-icon">🚪</span>

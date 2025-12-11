@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true)
 }
 
 $user = getUserByEmail($_SESSION['user_email']);
-if (!$user || $user['role'] !== 'tenant') {
+if (!$user) {
     header('Location: login.php');
     exit;
 }
@@ -46,14 +46,14 @@ if (isset($_GET['logout'])) {
             <div class="user-info">
                 <h3><?php echo htmlspecialchars($user['name']); ?></h3>
                 <p><?php echo htmlspecialchars($user['email']); ?></p>
-            </div>
+            </div>  
         </div>
         <nav class="sidebar-nav">
-            <a href="tenant_main.php" class="nav-item">
-                <span class="nav-icon">🏠</span>
-                <span>My Apartments</span>
+            <a href="<?php echo $user['role'] === 'tenant' ? 'tenant_main.php' : 'admin_main.php'; ?>" class="nav-item">
+                <span class="nav-icon">🏢</span>
+                <span>My organizations</span>
             </a>
-            <a href="all_requests.php" class="nav-item">
+            <a href="<?php echo $user['role'] === 'tenant' ? 'all_requests.php' : 'admin_all_requests.php'; ?>" class="nav-item">
                 <span class="nav-icon">📋</span>
                 <span>All Requests</span>
             </a>
@@ -76,7 +76,7 @@ if (isset($_GET['logout'])) {
                     <h1>👤 My Profile</h1>
                     <p>View and update your personal information</p>
                 </div>
-                <a href="tenant_main.php" class="btn-back">Back to Apartments</a>
+                <a href="<?php echo $user['role'] === 'tenant' ? 'tenant_main.php' : 'admin_main.php'; ?>" class="btn-back">Back to Organizations</a>
             </div>
         </div>
 

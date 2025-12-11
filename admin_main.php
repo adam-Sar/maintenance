@@ -2,20 +2,20 @@
 session_start();
 require_once 'helpers.php';
 
-// Check if user is logged in
+// Check if user is logged in and is a landlord
 if (!isset($_SESSION['user_logged_in']) || $_SESSION['user_logged_in'] !== true) {
     header('Location: login.php');
     exit;
 }
 
 $user = getUserByEmail($_SESSION['user_email']);
-if (!$user) {
-    header('Location: login.php');
+if (!$user || $user['role'] !== 'landlord') {
+    header('Location: tenant_main.php');
     exit;
 }
 
-// Get user's organizations
-$userOrganizations = getUserOrganizations($user['id']);
+// Get landlord's organizations
+$landlordOrganizations = getLandlordOrganizations($user['id']);
 
 // Logout handling
 if (isset($_GET['logout'])) {
@@ -29,7 +29,7 @@ if (isset($_GET['logout'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Organizations - MaintenanceHub</title>
+    <title>My Organizations - Admin Dashboard</title>
     <link rel="stylesheet" href="units_main.css">
 </head>
 <body>
@@ -52,11 +52,15 @@ if (isset($_GET['logout'])) {
             </div>
         </div>
         <nav class="sidebar-nav">
-            <a href="tenant_main.php" class="nav-item active">
+            <a href="admin_main.php" class="nav-item active">
                 <span class="nav-icon">🏢</span>
                 <span>My Organizations</span>
             </a>
-            <a href="all_requests.php" class="nav-item">
+            <a href="admin_manage_tenants.php" class="nav-item">
+                <span class="nav-icon">👥</span>
+                <span>Manage Tenants</span>
+            </a>
+            <a href="admin_all_requests.php" class="nav-item">
                 <span class="nav-icon">📋</span>
                 <span>All Requests</span>
             </a>
@@ -77,35 +81,31 @@ if (isset($_GET['logout'])) {
         <div class="top-bar">
             <div class="page-title">
                 <h1>My Organizations</h1>
-                <p>View and manage your organizations</p>
+                <p>Manage your properties and units</p>
             </div>
         </div>
 
         <?php if (isset($_GET['success'])): ?>
             <div class="success-alert">
-                <?php if ($_GET['success'] === 'joined'): ?>
-                    ✓ Successfully joined organization! You can now submit maintenance requests.
-                <?php elseif ($_GET['success'] === 'joined_unit'): ?>
-                    ✓ Successfully joined organization!
-                <?php elseif ($_GET['success'] === 'pending'): ?>
-                    ✓ Request submitted! Your membership is pending approval from the landlord.
+                <?php if ($_GET['success'] === 'created'): ?>
+                    ✓ Successfully created new organization!
                 <?php endif; ?>
             </div>
         <?php endif; ?>
 
-        <?php if (empty($userOrganizations)): ?>
+        <?php if (empty($landlordOrganizations)): ?>
             <!-- No Organizations State -->
             <div class="empty-state">
                 <div class="empty-icon">🏢</div>
                 <h2>No Organizations Found</h2>
-                <p>You haven't joined any organizations yet. Add your first organization to get started with maintenance requests.</p>
-                <a href="join_organization.php" class="btn-primary">Join Organization</a>
+                <p>You haven't created any organizations yet. Create your first organization to start managing units.</p>
+                <a href="create_organization.php" class="btn-primary">Create Organization</a>
             </div>
         <?php else: ?>
             <!-- Organizations Grid -->
             <div class="organizations-grid">
-                <?php foreach ($userOrganizations as $org): ?>
-                    <a href="organization_units.php?org_id=<?php echo $org['id']; ?>" class="organization-card">
+                <?php foreach ($landlordOrganizations as $org): ?>
+                    <a href="admin_organization_units.php?org_id=<?php echo $org['id']; ?>" class="organization-card">
                         <div class="organization-icon">
                             <div class="icon-circle">🏢</div>
                         </div>
@@ -122,18 +122,18 @@ if (isset($_GET['logout'])) {
                             <?php endif; ?>
                             
                             <div class="card-footer">
-                                <span class="view-units-btn">View My Units →</span>
+                                <span class="view-units-btn">Manage Units →</span>
                             </div>
                         </div>
                     </a>
                 <?php endforeach; ?>
                 
-                <!-- Add New Organization Card -->
-                <a href="join_organization.php" class="organization-card add-card">
+                <!-- Create New Organization Card -->
+                <a href="create_organization.php" class="organization-card add-card">
                     <div class="add-card-content">
                         <div class="add-icon">➕</div>
-                        <h3>Join New Organization</h3>
-                        <p>Add a new organization to manage</p>
+                        <h3>Create New Organization</h3>
+                        <p>Add a new property to manage</p>
                     </div>
                 </a>
             </div>

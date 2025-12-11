@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Redirect based on role
             if ($user['role'] === 'landlord') {
-                header('Location: admin_dashboard.php');
+                header('Location: admin_main.php');
             } else {
                 header('Location: tenant_main.php');
             }
