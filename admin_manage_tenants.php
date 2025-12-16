@@ -18,14 +18,6 @@ if (!$user || $user['role'] !== 'landlord') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $linkId = (int)($_POST['link_id'] ?? 0);
     
-    // Verify ownership indirectly by checking if this link exists for this admin
-    // For simplicity/performance in this MVP, we proceed if ID is valid and assume non-malicious admin for now
-    // But ideally we should verify the link ID belongs to an org owned by admin.
-    // The previous helper `getLandlordTenantRequests` only returns owned links, so if we trust the UI...
-    // But for security, let's verify.
-    // However, for speed in this interaction, I'll rely on the query restriction in the helper check or just direct ID operation if acceptable.
-    // Let's do a quick verification query.
-    
     $verifyQuery = "
         SELECT uu.id 
         FROM user_units uu

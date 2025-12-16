@@ -123,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_organization']))
                     <div class="empty-icon">🎉</div>
                     <h2>All Set!</h2>
                     <p>You're already a member of all available organizations.</p>
-                    <a href="tenant_main.php" class="btn-primary">Back to My Organizations</a>
+                    <a href="tenant_main.php" class="btn-primary">← Back to Organizations</a>
                 </div>
             <?php else: ?>
                 <form method="POST" id="joinForm">

@@ -208,7 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_unit'])) {
                 <div class="empty-icon">🏠</div>
                 <h2>No Units Available</h2>
                 <p>This organization doesn't have any units created yet. Please contact the organization administrator to add units.</p>
-                <a href="tenant_main.php" class="btn-primary">Back to Organizations</a>
+                <a href="tenant_main.php" class="btn-primary">← Back to Organizations</a>
             </div>
         <?php elseif (empty($userUnits)): ?>
             <!-- No User Units but has available -->

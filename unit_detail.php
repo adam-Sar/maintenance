@@ -46,7 +46,7 @@ if (!isUserInUnit($user['id'], $unitId)) {
 $myComplaints = getComplaintsByUnit($unitId, $user['id']);
 
 // Sort by submitted date (newest first)
-usort($myComplaints, function($a, $b) {
+usort($myComplaints, function ($a, $b) {
     return strtotime($b['submitted_at']) - strtotime($a['submitted_at']);
 });
 
@@ -59,24 +59,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
     $title = $_POST['title'] ?? '';
     $description = $_POST['description'] ?? '';
     $priority = $_POST['priority'] ?? 'medium';
-    
+
     if (empty($category) || empty($title) || empty($description)) {
         $errorMessage = 'Please fill in all required fields';
     } else {
         global $conn;
-        
+
         $orgIdInt = (int)$orgId;
         $userId = (int)$user['id'];
         $unitIdInt = (int)$unitId;
         $category = mysqli_real_escape_string($conn, $category);
         $title = mysqli_real_escape_string($conn, $title);
         $description = mysqli_real_escape_string($conn, $description);
-        
+
         $query = "INSERT INTO complaints (organization_id, user_id, unit_id, category, title, description, status) VALUES ($orgIdInt, $userId, $unitIdInt, '$category', '$title', '$description', 'pending')";
-        
+
         if (mysqli_query($conn, $query)) {
             $successMessage = 'Maintenance request submitted successfully!';
-            
+
             // Refresh complaints
             $myComplaints = getComplaintsByUnit($unitId, $user['id']);
         } else {
@@ -87,18 +87,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unit <?php echo htmlspecialchars($unit['name']); ?> - Maintenance</title>
     <link rel="stylesheet" href="unit_detail.css">
 </head>
+
 <body>
     <!-- Header -->
     <div class="page-header">
         <div class="header-container">
             <a href="organization_units.php?org_id=<?php echo $orgId; ?>" class="back-btn">
-                <span>←</span> Back to Units
+                ← Back to Units
             </a>
             <div class="unit-header-info">
                 <div class="header-details">
@@ -119,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
                 ✓ <?php echo htmlspecialchars($successMessage); ?>
             </div>
         <?php endif; ?>
-        
+
         <?php if ($errorMessage): ?>
             <div class="error-alert">
                 ✗ <?php echo htmlspecialchars($errorMessage); ?>
@@ -144,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
                                 <option value="General">🔧 General</option>
                             </select>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="priority">Priority *</label>
                             <select name="priority" id="priority" required>
@@ -154,17 +156,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="title">Issue Title *</label>
                         <input type="text" name="title" id="title" placeholder="Brief description" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="description">Detailed Description *</label>
                         <textarea name="description" id="description" rows="4" placeholder="Provide detailed information..." required></textarea>
                     </div>
-                    
+
                     <button type="submit" name="submit_complaint" class="btn-submit">Submit Request</button>
                 </form>
             </div>
@@ -172,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
             <!-- My Requests -->
             <div class="requests-section">
                 <h2>📋 My Requests (<?php echo count($myComplaints); ?>)</h2>
-                
+
                 <?php if (empty($myComplaints)): ?>
                     <div class="empty-state">
                         <p>📭 No requests submitted yet</p>
@@ -204,4 +206,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
         </div>
     </div>
 </body>
+
 </html>

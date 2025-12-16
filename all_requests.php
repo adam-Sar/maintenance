@@ -109,7 +109,7 @@ if (isset($_GET['logout'])) {
                     <h1>📋 All Maintenance Requests</h1>
                     <p>View and track all your submitted maintenance requests</p>
                 </div>
-                <a href="tenant_main.php" class="btn-back">Back to Organizations</a>
+                <a href="tenant_main.php" class="btn-back">← Back to Organizations</a>
             </div>
         </div>
 

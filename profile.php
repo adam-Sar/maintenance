@@ -23,12 +23,14 @@ if (isset($_GET['logout'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - MaintenanceHub</title>
     <link rel="stylesheet" href="profile.css"> <!-- use existing styles -->
 </head>
+
 <body>
     <!-- Hamburger Menu -->
     <div class="hamburger-menu" id="hamburgerMenu">
@@ -46,7 +48,7 @@ if (isset($_GET['logout'])) {
             <div class="user-info">
                 <h3><?php echo htmlspecialchars($user['name']); ?></h3>
                 <p><?php echo htmlspecialchars($user['email']); ?></p>
-            </div>  
+            </div>
         </div>
         <nav class="sidebar-nav">
             <a href="<?php echo $user['role'] === 'tenant' ? 'tenant_main.php' : 'admin_main.php'; ?>" class="nav-item">
@@ -76,7 +78,7 @@ if (isset($_GET['logout'])) {
                     <h1>👤 My Profile</h1>
                     <p>View and update your personal information</p>
                 </div>
-                <a href="<?php echo $user['role'] === 'tenant' ? 'tenant_main.php' : 'admin_main.php'; ?>" class="btn-back">Back to Organizations</a>
+                <a href="<?php echo $user['role'] === 'tenant' ? 'tenant_main.php' : 'admin_main.php'; ?>" class="btn-back">← Back to Organizations</a>
             </div>
         </div>
 
@@ -98,7 +100,7 @@ if (isset($_GET['logout'])) {
     </div>
 
     <script>
-        function toggleMenu(){
+        function toggleMenu() {
             const sidebar = document.getElementById('sidebar');
             const hamburger = document.getElementById('hamburgerMenu');
             sidebar.classList.toggle('active');
@@ -106,4 +108,5 @@ if (isset($_GET['logout'])) {
         }
     </script>
 </body>
+
 </html>
