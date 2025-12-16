@@ -411,18 +411,6 @@ body::after {
     width: 6px;
 }
 
-.request-card.priority-high::before {
-    background: #ef4444;
-}
-
-.request-card.priority-medium::before {
-    background: #f97316;
-}
-
-.request-card.priority-low::before {
-    background: #3b82f6;
-}
-
 .request-header {
     display: flex;
     justify-content: space-between;
@@ -456,24 +444,6 @@ body::after {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.02em;
-}
-
-.priority-high .badge {
-    background: #fef2f2;
-    color: #ef4444;
-    border: 1px solid #fee2e2;
-}
-
-.priority-medium .badge {
-    background: #fff7ed;
-    color: #f97316;
-    border: 1px solid #ffedd5;
-}
-
-.priority-low .badge {
-    background: #eff6ff;
-    color: #3b82f6;
-    border: 1px solid #dbeafe;
 }
 
 .status-pending {
