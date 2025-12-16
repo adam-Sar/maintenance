@@ -262,6 +262,9 @@ if (isset($_GET['logout'])) {
                                         </div>
                                     </div>
                                     <div class="badges">
+                                        <span class="priority-badge <?php echo htmlspecialchars($complaint['priority'] ?? 'standard'); ?>">
+                                            <?php echo ucfirst($complaint['priority'] ?? 'standard'); ?>
+                                        </span>
                                         <span class="badge <?php echo getStatusBadgeClass($complaint['status']); ?>">
                                             <?php echo ucfirst(str_replace('_', ' ', $complaint['status'])); ?>
                                         </span>

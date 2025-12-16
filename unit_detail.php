@@ -71,8 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
         $category = mysqli_real_escape_string($conn, $category);
         $title = mysqli_real_escape_string($conn, $title);
         $description = mysqli_real_escape_string($conn, $description);
+        $priority = mysqli_real_escape_string($conn, $priority);
 
-        $query = "INSERT INTO complaints (organization_id, user_id, unit_id, category, title, description, status) VALUES ($orgIdInt, $userId, $unitIdInt, '$category', '$title', '$description', 'pending')";
+        $query = "INSERT INTO complaints (organization_id, user_id, unit_id, category, title, description, status, priority) VALUES ($orgIdInt, $userId, $unitIdInt, '$category', '$title', '$description', 'pending', '$priority')";
 
         if (mysqli_query($conn, $query)) {
             $successMessage = 'Maintenance request submitted successfully!';
@@ -151,8 +152,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
                             <label for="priority">Priority *</label>
                             <select name="priority" id="priority" required>
                                 <option value="low">Low</option>
-                                <option value="medium" selected>Medium</option>
+                                <option value="standard" selected>Standard</option>
                                 <option value="high">High</option>
+                                <option value="emergency">Emergency</option>
                             </select>
                         </div>
                     </div>
@@ -188,6 +190,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_complaint'])) 
                                         📁 <?php echo htmlspecialchars($complaint['category']); ?>
                                     </div>
                                     <div class="badges">
+                                        <span class="priority-badge <?php echo htmlspecialchars($complaint['priority'] ?? 'standard'); ?>">
+                                            <?php echo ucfirst($complaint['priority'] ?? 'standard'); ?>
+                                        </span>
                                         <span class="badge <?php echo getStatusBadgeClass($complaint['status']); ?>">
                                             <?php echo ucfirst(str_replace('_', ' ', $complaint['status'])); ?>
                                         </span>
