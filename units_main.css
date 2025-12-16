@@ -4,6 +4,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    z-index: 1;
 }
 
 body {
@@ -173,7 +174,7 @@ body::after {
 /* Main Content */
 .main-content {
     margin-left: 0;
-    padding: 100px 40px 40px;
+    padding: 40px 40px 40px;
     min-height: 100vh;
 }
 
@@ -182,10 +183,15 @@ body::after {
     max-width: 1600px;
     margin: 0 auto 50px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     gap: 30px;
     flex-wrap: wrap;
+    position: relative;
+}
+
+.page-title {
+    text-align: center;
 }
 
 .page-title h1 {
@@ -209,9 +215,9 @@ body::after {
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
-    margin-bottom: 12px;
     transition: all 0.2s ease;
 }
+
 
 .back-link:hover {
     color: #8b5cf6;

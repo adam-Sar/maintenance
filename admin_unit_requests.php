@@ -77,8 +77,10 @@ $resolvedCount = count(array_filter($complaints, fn($c) => $c['status'] === 'res
     <style>
         /* Overrides/Fixes for mixed css */
         .page-title h1 { color: #1e293b; }
-        .back-link { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; text-decoration: none; color: #64748b; font-weight: 500; }
         .back-link:hover { color: #7c3aed; }
+        .back-link{
+            right: 100px;
+        }
         .dashboard-content { padding-top: 0; }
         .complaints-section { margin-top: 20px; }
     </style>

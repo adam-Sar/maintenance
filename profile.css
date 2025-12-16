@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 * {
     margin: 0;
@@ -157,9 +156,7 @@ body::after {
     color: #7c3aed;
 }
 
-.nav-icon {
-    font-size: 20px;
-}
+/* .nav-icon removed */
 
 
 /* Main Content */
@@ -178,7 +175,7 @@ body::after {
 
 .header-content {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     flex-wrap: wrap;
     gap: 20px;
@@ -205,6 +202,8 @@ body::after {
     font-weight: 600;
     border: 1px solid #e2e8f0;
     transition: all 0.2s ease;
+    position: absolute;
+    right: 10px;
 }
 
 .btn-back:hover {
@@ -263,7 +262,5 @@ body::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
     margin-bottom: 16px;
-    color: #7c3aed;
 }
