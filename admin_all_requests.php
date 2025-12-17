@@ -54,8 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $complaintId = (int)$_POST['complaint_id'];
     $newStatus = mysqli_real_escape_string($conn, $_POST['status']);
     
-    // Security check: ensure complaint belongs to an org owned by this landlord
-    // We can just check if the complaint ID is in our $allComplaints list to verify ownership
     $isOwned = false;
     foreach ($allComplaints as $c) {
         if ($c['id'] == $complaintId) {

@@ -50,9 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Fetch requests
 $requests = getLandlordTenantRequests($user['id']);
 
-// Filters? Not strictly requested but helpful. User said "make a page where the join requests are sent".
-// I'll stick to a simple list for now as requested.
-
 // Logout handling
 if (isset($_GET['logout'])) {
     session_destroy();

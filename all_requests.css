@@ -24,7 +24,6 @@ body::after {
     position: absolute;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.4);
-    animation: float 20s infinite ease-in-out;
 }
 
 body::before {
@@ -39,7 +38,6 @@ body::after {
     height: 300px;
     bottom: -100px;
     left: -50px;
-    animation-delay: 5s;
 }
 
 /* Hamburger Menu - Same as tenant_main */
@@ -48,7 +46,7 @@ body::after {
     top: 30px;
     left: 24px;
     z-index: 1001;
-    transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: left 0.4s ease;
 }
 
 .hamburger-menu.shifted {
@@ -68,7 +66,7 @@ body::after {
     align-items: center;
     gap: 5px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
 }
 
 .hamburger-btn:hover {
@@ -99,7 +97,7 @@ body::after {
     background: white;
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.03);
     z-index: 1000;
-    transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: left 0.4s ease;
     overflow-y: auto;
     border-right: 1px solid #f1f5f9;
 }
@@ -240,7 +238,7 @@ body::after {
     align-items: center;
     gap: 20px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s ease;
     border: 1px solid #f1f5f9;
 }
 
@@ -384,7 +382,7 @@ body::after {
     padding: 28px;
     border-radius: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     border: 1px solid #f1f5f9;
     position: relative;
     overflow: hidden;
@@ -528,7 +526,7 @@ body::after {
     border-radius: 12px;
     font-weight: 600;
     font-size: 16px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
 }
 

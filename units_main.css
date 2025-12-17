@@ -44,7 +44,7 @@ body::after {
     top: 24px;
     left: 24px;
     z-index: 1001;
-    transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: left 0.4s ease;
 }
 
 .hamburger-menu.shifted {
@@ -64,7 +64,7 @@ body::after {
     align-items: center;
     gap: 5px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
 }
 
 .hamburger-btn:hover {
@@ -95,7 +95,7 @@ body::after {
     background: white;
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.03);
     z-index: 1000;
-    transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: left 0.4s ease;
     overflow-y: auto;
     border-right: 1px solid #f1f5f9;
 }
@@ -238,7 +238,7 @@ body::after {
     font-weight: 600;
     font-size: 15px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
 }
 
@@ -257,7 +257,6 @@ body::after {
     border-radius: 12px;
     font-weight: 500;
     border: 1px solid #dcfce7;
-    animation: slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     align-items: center;
     gap: 12px;
@@ -272,25 +271,12 @@ body::after {
     border-radius: 12px;
     font-weight: 500;
     border: 1px solid #fee2e2;
-    animation: slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Quick Add Unit Section */
+/* Add Unit Section */
 .quick-add-section {
     max-width: 1600px;
     margin: 0 auto 40px;
@@ -347,7 +333,7 @@ body::after {
     flex-direction: column;
     height: 100%;
     border: 1px solid #f1f5f9;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     position: relative;
 }
 
@@ -489,7 +475,7 @@ body::after {
     display: flex;
     flex-direction: column;
     border: 1px solid #f1f5f9;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     position: relative;
 }
 
@@ -506,7 +492,6 @@ body::after {
     align-items: center;
     background: linear-gradient(135deg, #faf5ff, #f5f3ff);
     z-index: 1;
-    /* prevent circle layer from appearing above the card */
 }
 
 .icon-badge {
@@ -617,7 +602,7 @@ body::after {
     border-radius: 14px;
     font-weight: 600;
     font-size: 16px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
 }
 

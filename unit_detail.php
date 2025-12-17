@@ -43,12 +43,7 @@ if (!isUserInUnit($user['id'], $unitId)) {
 }
 
 // Get all complaints for this unit by this user
-$myComplaints = getComplaintsByUnit($unitId, $user['id']);
-
-// Sort by submitted date (newest first)
-usort($myComplaints, function ($a, $b) {
-    return strtotime($b['submitted_at']) - strtotime($a['submitted_at']);
-});
+$myComplaints = getComplaintsByUnit($unitId, $user['id']);  
 
 $successMessage = '';
 $errorMessage = '';
