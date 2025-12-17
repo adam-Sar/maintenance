@@ -32,7 +32,7 @@ $pendingCount = count(array_filter($allComplaints, fn($c) => $c['status'] === 'p
 $inProgressCount = count(array_filter($allComplaints, fn($c) => $c['status'] === 'in_progress'));
 $resolvedCount = count(array_filter($allComplaints, fn($c) => $c['status'] === 'resolved'));
 
-// Filter
+// Filter   
 $filterStatus = $_GET['status'] ?? 'all';
 $filterCategory = $_GET['category'] ?? 'all';
 

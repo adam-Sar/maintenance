@@ -11,19 +11,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
-    $new_org_name = $_POST['new_org_name'] ?? '';
-    $new_org_name = $_POST['new_org_name'] ?? '';
     
     // Validation
     if (empty($role) || empty($name) || empty($email) || empty($password) || empty($confirm_password)) {
         $error = 'Please fill in all required fields';
-    } elseif ($role === 'landlord' && empty($new_org_name)) {
-        $error = 'Landlords must provide an organization name';
     } elseif (!preg_match("#^[a-zA-Z\s'-]+$#", $name)) {
         $error = 'Name can only contain letters, spaces, hyphens, and apostrophes';
-    } elseif ($role === 'landlord' && !preg_match("#^[a-zA-Z0-9\s.,'&-]+$#", $new_org_name)) {
-        $error = 'Organization name can only contain letters, numbers, spaces, and basic punctuation';
-
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Please enter a valid email address';
     } elseif (getUserByEmail($email)) {
@@ -55,15 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             $user_id = mysqli_insert_id($conn);
-            
-            // Handle Landlord Organization Creation
-            if ($role === 'landlord') {
-                $new_org_name = mysqli_real_escape_string($conn, $new_org_name);
-                $query = "INSERT INTO organizations (name, admin_id) VALUES ('$new_org_name', $user_id)";
-                if (!mysqli_query($conn, $query)) {
-                    throw new Exception("Error creating organization: " . mysqli_error($conn));
-                }
-            }
+
             // Handle Tenant - No extra setup at signup
             
             // Commit transaction
@@ -115,23 +100,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     name="role" 
                     required
                     style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; font-family: 'Inter', sans-serif; background: white; cursor: pointer;"
-                    onchange="toggleUnitField()"
                 >
                     <option value="">Select your role...</option>
                     <option value="landlord" <?php echo (($_POST['role'] ?? '') === 'landlord') ? 'selected' : ''; ?>>🏗️ Landlord / Property Manager</option>
                     <option value="tenant" <?php echo (($_POST['role'] ?? '') === 'tenant') ? 'selected' : ''; ?>>👤 Tenant / Resident</option>
                 </select>
-            </div>
-
-            <div class="form-group" id="new-org-group" style="display: none;">
-                <label for="new_org_name">Organization Name</label>
-                <input 
-                    type="text" 
-                    id="new_org_name" 
-                    name="new_org_name" 
-                    placeholder="Enter your organization name"
-                    value="<?php echo htmlspecialchars($_POST['new_org_name'] ?? ''); ?>"
-                >
             </div>
             
             <div class="form-group">
@@ -188,26 +161,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
     
-    <script>
-        function toggleUnitField() {
-            const role = document.getElementById('role').value;
-            const newOrgGroup = document.getElementById('new-org-group');
-            const newOrgInput = document.getElementById('new_org_name');
-            
-            if (role === 'tenant') {
-                newOrgGroup.style.display = 'none';
-                newOrgInput.required = false;
-            } else if (role === 'landlord') {
-                newOrgGroup.style.display = 'block';
-                newOrgInput.required = true;
-            } else {
-                newOrgGroup.style.display = 'none';
-                newOrgInput.required = false;
-            }
-        }
-        
-        // Run on load
-        toggleUnitField();
-    </script>
 </body>
 </html>
