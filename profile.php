@@ -55,6 +55,12 @@ if (isset($_GET['logout'])) {
                 <span class="nav-icon">🏢</span>
                 <span>My organizations</span>
             </a>
+            <?php if ($user['role'] === 'landlord'): ?>
+            <a href="admin_manage_tenants.php" class="nav-item">
+                <span class="nav-icon">👥</span>
+                <span>Manage Tenants</span>
+            </a>
+            <?php endif; ?>
             <a href="<?php echo $user['role'] === 'tenant' ? 'all_requests.php' : 'admin_all_requests.php'; ?>" class="nav-item">
                 <span class="nav-icon">📋</span>
                 <span>All Requests</span>
