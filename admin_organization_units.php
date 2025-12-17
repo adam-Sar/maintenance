@@ -57,8 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_unit'])) {
             $query = "INSERT INTO units (name, description, organization_id) VALUES ('$unitName', '$unitDesc', $orgIdInt)";
             if (mysqli_query($conn, $query)) {
                 $successMessage = 'Unit created successfully!';
-                // Refresh to show new unit
-                // header("Refresh:0"); // Optional or just fall through
             } else {
                 $errorMessage = "Error creating unit: " . mysqli_error($conn);
             }
